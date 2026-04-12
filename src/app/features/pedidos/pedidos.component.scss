@@ -1,0 +1,71 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #3E6F57;
+  margin: 0;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+}
+
+th.mat-header-cell {
+  font-weight: 700;
+  color: #555;
+}
+
+.cliente-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  small { color: #999; font-size: 0.8rem; }
+}
+
+.detalle-mini {
+  font-size: 0.85rem;
+  color: #444;
+  line-height: 1.4;
+}
+
+.badge-maqueta {
+  background: #ff9800;
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 5px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+
+.estado-select {
+  width: 130px;
+}
+
+.empty-row {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+
+  mat-icon {
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 80px;
+}

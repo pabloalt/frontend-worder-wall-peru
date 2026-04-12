@@ -1,0 +1,305 @@
+<div class="page-container">
+
+  <!-- Hero Header -->
+  <div class="form-header">
+    <h1>Registro de Pedido</h1>
+    <p>Completa el formulario y recibirás tu contrato en tu correo electrónico.</p>
+  </div>
+
+  <!-- Success state -->
+  <mat-card *ngIf="success()" class="success-card">
+    <mat-card-content>
+      <mat-icon color="primary">check_circle</mat-icon>
+      <h2>¡Pedido registrado exitosamente!</h2>
+      <p>Tu contrato ha sido generado y enviado a tu correo.</p>
+      <a *ngIf="contratoUrl()" [href]="contratoUrl()!" mat-raised-button color="primary" target="_blank">
+        <mat-icon>picture_as_pdf</mat-icon> Ver Contrato PDF
+      </a>
+      <button mat-stroked-button (click)="success.set(false)">Registrar otro pedido</button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Form -->
+  <form *ngIf="!success()" [formGroup]="form" (ngSubmit)="onSubmit()">
+
+    <!-- Datos del Cliente -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>person</mat-icon> Datos del Cliente
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nombre completo *</mat-label>
+            <input matInput formControlName="nombre" placeholder="Ej: María García López">
+            <mat-error *ngIf="form.get('nombre')?.hasError('required')">El nombre es requerido</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row cols-3">
+          <mat-form-field appearance="outline">
+            <mat-label>DNI *</mat-label>
+            <input matInput formControlName="dni" placeholder="12345678" maxlength="8">
+            <mat-error *ngIf="form.get('dni')?.hasError('pattern')">DNI debe tener 8 dígitos</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Celular</mat-label>
+            <input matInput formControlName="celular" placeholder="987654321">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" type="email" placeholder="correo@ejemplo.com">
+            <mat-error *ngIf="form.get('email')?.hasError('email')">Email inválido</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de Boda *</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="fechaBoda" [min]="minDate">
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="form.get('fechaBoda')?.hasError('required')">La fecha es requerida</mat-error>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Detalles de Torta / Keke -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>cake</mat-icon> Detalle de Tortas / Kekes
+        </mat-card-title>
+        <span class="spacer"></span>
+        <button mat-mini-fab color="accent" type="button" (click)="agregarDetalle()" matTooltip="Agregar torta">
+          <mat-icon>add</mat-icon>
+        </button>
+      </mat-card-header>
+
+      <mat-card-content formArrayName="detalles">
+        <div *ngFor="let detalle of detalles.controls; let i = index"
+             [formGroupName]="i" class="detalle-item">
+          <div class="detalle-header">
+            <span>Torta #{{ i + 1 }}</span>
+            <button mat-icon-button color="warn" type="button"
+                    (click)="eliminarDetalle(i)" *ngIf="detalles.length > 1">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+
+          <div class="form-row cols-3">
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de Keke *</mat-label>
+              <input matInput formControlName="tipoKeke" placeholder="Ej: Torta de 3 pisos">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Relleno</mat-label>
+              <input matInput formControlName="relleno" placeholder="Ej: Manjar blanco">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Porciones *</mat-label>
+              <input matInput type="number" formControlName="porciones" min="1">
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-checkbox formControlName="esMaqueta">Es maqueta (decorativa)</mat-checkbox>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Observaciones</mat-label>
+              <textarea matInput formControlName="observaciones" rows="2"></textarea>
+            </mat-form-field>
+          </div>
+
+          <!-- Imagen referencial -->
+          <div class="form-row">
+            <label class="imagen-label">
+              <mat-icon>add_photo_alternate</mat-icon> Imagen referencial
+              <small>(opcional — se adjuntará en el contrato)</small>
+            </label>
+            <input #fileInput type="file" accept="image/*" style="display:none"
+                   (change)="seleccionarImagen(i, $event)">
+
+            <!-- Zona de carga (sin imagen) -->
+            <div class="upload-zone" *ngIf="!imagenesDetalle()[i]"
+                 (click)="fileInput.click()">
+              <mat-icon>cloud_upload</mat-icon>
+              <span>Haz clic para adjuntar imagen</span>
+              <small>JPG, PNG, WEBP — máx. 5 MB</small>
+            </div>
+
+            <!-- Preview (con imagen) -->
+            <div class="imagen-preview" *ngIf="imagenesDetalle()[i]">
+              <img [src]="imagenesDetalle()[i]!" alt="Referencia torta {{ i + 1 }}">
+              <div class="imagen-actions">
+                <button mat-mini-fab color="primary" type="button"
+                        (click)="fileInput.click()" matTooltip="Cambiar imagen">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-mini-fab color="warn" type="button"
+                        (click)="eliminarImagen(i)" matTooltip="Quitar imagen">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <mat-divider *ngIf="i < detalles.length - 1"></mat-divider>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Importe y Pago -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>payments</mat-icon> Importe y Condiciones de Pago
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+
+        <!-- Importe total con desglose IGV -->
+        <div class="importe-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Importe Total (con IGV)</mat-label>
+            <span matPrefix>S/&nbsp;</span>
+            <input matInput type="number" formControlName="importeTotal" min="0" step="0.01" placeholder="0.00">
+          </mat-form-field>
+
+          <div class="igv-desglose" *ngIf="(form.get('importeTotal')?.value ?? 0) > 0">
+            <div class="igv-row">
+              <span>Subtotal (sin IGV)</span>
+              <span>S/ {{ subtotal | number:'1.2-2' }}</span>
+            </div>
+            <div class="igv-row igv-line">
+              <span>IGV (18%)</span>
+              <span>S/ {{ igvMonto | number:'1.2-2' }}</span>
+            </div>
+            <div class="igv-row total-line">
+              <span><strong>Total</strong></span>
+              <span><strong>S/ {{ (form.get('importeTotal')?.value ?? 0) | number:'1.2-2' }}</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Número de cuotas -->
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Número de cuotas</mat-label>
+            <mat-select formControlName="numeroCuotas">
+              <mat-option [value]="1">1 cuota (pago único)</mat-option>
+              <mat-option [value]="2">2 cuotas</mat-option>
+              <mat-option [value]="3">3 cuotas</mat-option>
+              <mat-option [value]="4">4 cuotas</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Detalle de cuotas -->
+        <div *ngIf="form.get('numeroCuotas')?.value > 1" formArrayName="cuotas" class="cuotas-container">
+          <div *ngFor="let cuota of cuotas.controls; let i = index"
+               [formGroupName]="i" class="cuota-item">
+            <div class="cuota-badge">Cuota {{ i + 1 }}</div>
+            <div class="form-row cols-2">
+
+              <mat-form-field appearance="outline">
+                <mat-label>Importe</mat-label>
+                <span matPrefix>S/&nbsp;</span>
+                <input matInput type="number" formControlName="importe" min="0" step="0.01" placeholder="0.00">
+              </mat-form-field>
+
+              <!-- Cuota 1: al firmar -->
+              <div class="fecha-firma" *ngIf="i === 0">
+                <mat-icon>event_available</mat-icon>
+                <span>Al firmar el contrato</span>
+              </div>
+
+              <!-- Cuotas 2+: datepicker -->
+              <mat-form-field appearance="outline" *ngIf="i > 0">
+                <mat-label>Fecha de pago</mat-label>
+                <input matInput [matDatepicker]="dp" formControlName="fecha">
+                <mat-datepicker-toggle matIconSuffix [for]="dp"></mat-datepicker-toggle>
+                <mat-datepicker #dp></mat-datepicker>
+              </mat-form-field>
+
+            </div>
+          </div>
+
+          <!-- Validación suma cuotas -->
+          <div class="cuotas-total" *ngIf="(form.get('importeTotal')?.value ?? 0) > 0">
+            <mat-icon [color]="cuotasDiff <= 0.01 ? 'primary' : 'warn'">
+              {{ cuotasDiff <= 0.01 ? 'check_circle' : 'warning' }}
+            </mat-icon>
+            <span>Suma de cuotas: <strong>S/ {{ totalCuotas | number:'1.2-2' }}</strong></span>
+            <span *ngIf="cuotasDiff > 0.01" class="diff-warn">
+              &mdash; diferencia de S/ {{ cuotasDiff | number:'1.2-2' }} con el total
+            </span>
+          </div>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Logística -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>local_shipping</mat-icon> Logística de Entrega <span class="optional">(Opcional)</span>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row cols-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre del Local</mat-label>
+            <input matInput formControlName="nombreLocal" placeholder="Ej: Salón Los Jardines">
+          </mat-form-field>
+
+          <div class="hora-llegada-wrapper">
+            <mat-form-field appearance="outline" [class.disabled-field]="form.get('horaLlegadaPorConfirmar')?.value">
+              <mat-label>Hora de Llegada</mat-label>
+              <input matInput formControlName="horaLlegada" type="time"
+                [disabled]="form.get('horaLlegadaPorConfirmar')?.value">
+              <mat-hint>Formato: HH:MM (24 hs)</mat-hint>
+            </mat-form-field>
+            <mat-checkbox formControlName="horaLlegadaPorConfirmar">Por confirmar</mat-checkbox>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Dirección</mat-label>
+            <input matInput formControlName="direccion" placeholder="Av. Los Álamos 123, Lima">
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Link de Google Maps</mat-label>
+            <input matInput formControlName="ubicacionMaps" placeholder="https://maps.google.com/...">
+            <mat-icon matSuffix>map</mat-icon>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Submit -->
+    <div class="form-actions">
+      <button mat-raised-button color="primary" type="submit"
+              [disabled]="loading()">
+        <mat-spinner *ngIf="loading()" diameter="20"></mat-spinner>
+        <mat-icon *ngIf="!loading()">send</mat-icon>
+        {{ loading() ? 'Procesando...' : 'Registrar Pedido y Generar Contrato' }}
+      </button>
+    </div>
+
+  </form>
+</div>

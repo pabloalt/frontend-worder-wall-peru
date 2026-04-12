@@ -1,0 +1,199 @@
+.page-container {
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Panel enlace externo */
+.enlace-panel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: #eaf2ee;
+  border: 1px solid #b2d8c5;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  animation: fadeIn .2s ease;
+
+  .enlace-icon { color: #3E6F57; font-size: 20px; height: 20px; width: 20px; }
+  .enlace-label { font-weight: 600; color: #3E6F57; font-size: 0.9rem; white-space: nowrap; }
+
+  .enlace-url {
+    flex: 1;
+    min-width: 160px;
+    font-size: 0.85rem;
+    background: #fff;
+    border: 1px solid #cde8d9;
+    border-radius: 6px;
+    padding: 4px 10px;
+    color: #333;
+    word-break: break-all;
+  }
+
+  .enlace-acciones {
+    display: flex;
+    gap: 2px;
+  }
+
+  .whatsapp-btn mat-icon { color: #25d366; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #3E6F57;
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+/* Stats */
+.stats-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #eaf2ee;
+  color: #3E6F57;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+
+  mat-icon { font-size: 18px; height: 18px; width: 18px; }
+
+  &.ok   { background: #e8f5e9; color: #388e3c; }
+  &.warn { background: #fff8e1; color: #f57c00; }
+}
+
+/* Buscador */
+.search-field {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+/* Spinner */
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 80px;
+}
+
+/* Tabla */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+}
+
+th.mat-header-cell {
+  font-weight: 700;
+  color: #555;
+}
+
+/* Celda cliente */
+.cliente-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0;
+
+  .dni  { color: #777; font-size: 0.8rem; }
+  .fecha { color: #bbb; font-size: 0.75rem; }
+}
+
+/* Celda contacto */
+.contacto-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contacto-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.action-sm {
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+
+  mat-icon { font-size: 18px; height: 18px; width: 18px; }
+}
+
+.whatsapp-icon {
+  color: #25d366;
+}
+
+.sin-contacto {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #bbb;
+  font-size: 0.8rem;
+
+  mat-icon { font-size: 16px; height: 16px; width: 16px; }
+}
+
+/* Badge pedidos */
+.badge-pedidos {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #3E6F57;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* Acciones contrato */
+.contrato-acciones {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Fila vacía */
+.empty-row {
+  text-align: center;
+  padding: 48px;
+  color: #999;
+
+  mat-icon {
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+}

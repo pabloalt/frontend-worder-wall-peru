@@ -1,0 +1,74 @@
+/* Contenedor raíz */
+.app-container {
+  height: 100vh;
+}
+
+/* Sidenav */
+.app-sidenav {
+  width: 260px;
+}
+
+.sidenav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 8px 12px 16px;
+  background: #3E6F57;
+  color: white;
+
+  .sidenav-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  button { color: white; }
+}
+
+.sidenav-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  color: #555;
+
+  mat-icon { color: #3E6F57; }
+}
+
+.active-nav-item {
+  background: rgba(62, 111, 87, 0.12) !important;
+  color: #3E6F57 !important;
+  font-weight: 600;
+
+  mat-icon { color: #3E6F57; }
+}
+
+.logout-item {
+  color: #d32f2f;
+  mat-icon { color: #d32f2f; }
+}
+
+/* Toolbar */
+.app-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.toolbar-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.user-name {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  margin-right: 4px;
+}
+
+/* Contenido */
+.main-content {
+  min-height: calc(100vh - 64px);
+}

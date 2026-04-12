@@ -1,0 +1,157 @@
+<div class="page-container">
+
+  <!-- Header -->
+  <div class="form-header">
+    <h1>Registrar datos de cliente</h1>
+    <p>Completá el formulario con tus datos para que podamos registrarte.</p>
+  </div>
+
+  <!-- Success state -->
+  <mat-card *ngIf="success()" class="success-card">
+    <mat-card-content>
+      <mat-icon color="primary">check_circle</mat-icon>
+      <h2>¡Datos guardados exitosamente!</h2>
+      <p>Tus datos fueron registrados. Nos pondremos en contacto contigo próximamente.</p>
+      <button mat-stroked-button (click)="nuevoRegistro()">Registrar otro cliente</button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Form -->
+  <form *ngIf="!success()" [formGroup]="form" (ngSubmit)="onSubmit()">
+
+    <!-- Datos del Cliente -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>person</mat-icon> Datos del Cliente
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+
+        <!-- Documento -->
+        <div class="form-row cols-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de documento **</mat-label>
+            <mat-select formControlName="tipoDocumento">
+              <mat-option value="DNI">DNI</mat-option>
+              <mat-option value="RUC">RUC</mat-option>
+              <mat-option value="CE">Carné de Extranjería</mat-option>
+            </mat-select>
+            <mat-error *ngIf="form.get('tipoDocumento')?.hasError('required')">El tipo de documento es requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Número de documento **</mat-label>
+            <input matInput formControlName="numeroDocumento" placeholder="Ej: 12345678">
+            <mat-error *ngIf="form.get('numeroDocumento')?.hasError('required')">El número de documento es requerido</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Nombres y apellidos -->
+        <div class="form-row cols-3">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombres **</mat-label>
+            <input matInput formControlName="nombres" placeholder="Ej: María Fernanda">
+            <mat-error *ngIf="form.get('nombres')?.hasError('required')">Los nombres son requeridos</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Apellido Paterno **</mat-label>
+            <input matInput formControlName="apellidoPaterno" placeholder="Ej: García">
+            <mat-error *ngIf="form.get('apellidoPaterno')?.hasError('required')">El apellido paterno es requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Apellido Materno</mat-label>
+            <input matInput formControlName="apellidoMaterno" placeholder="Ej: López">
+          </mat-form-field>
+        </div>
+
+        <!-- Fechas -->
+        <div class="form-row cols-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de cumpleaños</mat-label>
+            <input matInput [matDatepicker]="pickerCumple" formControlName="fechaCumpleanios">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerCumple"></mat-datepicker-toggle>
+            <mat-datepicker #pickerCumple></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de Boda **</mat-label>
+            <input matInput [matDatepicker]="pickerBoda" formControlName="fechaBoda" [min]="minDate">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerBoda"></mat-datepicker-toggle>
+            <mat-datepicker #pickerBoda></mat-datepicker>
+            <mat-error *ngIf="form.get('fechaBoda')?.hasError('required')">La fecha de boda es requerida</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Contacto -->
+        <div class="form-row cols-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Celular</mat-label>
+            <input matInput formControlName="celular" placeholder="987654321">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" type="email" placeholder="correo@ejemplo.com">
+            <mat-error *ngIf="form.get('email')?.hasError('email')">Email inválido</mat-error>
+          </mat-form-field>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Logística -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>local_shipping</mat-icon> Logística de Entrega <span class="optional">(Opcional)</span>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row cols-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre del Local</mat-label>
+            <input matInput formControlName="nombreLocal" placeholder="Ej: Salón Los Jardines">
+          </mat-form-field>
+
+          <div class="hora-llegada-wrapper">
+            <mat-form-field appearance="outline" [class.disabled-field]="form.get('horaLlegadaPorConfirmar')?.value">
+              <mat-label>Hora de Llegada</mat-label>
+              <input matInput formControlName="horaLlegada" type="time"
+                [disabled]="form.get('horaLlegadaPorConfirmar')?.value">
+              <mat-hint>Formato: HH:MM (24 hs)</mat-hint>
+            </mat-form-field>
+            <mat-checkbox formControlName="horaLlegadaPorConfirmar">Por confirmar</mat-checkbox>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Dirección</mat-label>
+            <input matInput formControlName="direccion" placeholder="Av. Los Álamos 123, Lima">
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Link de Google Maps</mat-label>
+            <input matInput formControlName="ubicacionMaps" placeholder="https://maps.google.com/...">
+            <mat-icon matSuffix>map</mat-icon>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Submit -->
+    <div class="form-actions">
+      <button mat-raised-button color="primary" type="submit" [disabled]="loading()">
+        <mat-spinner *ngIf="loading()" diameter="20"></mat-spinner>
+        <mat-icon *ngIf="!loading()">save</mat-icon>
+        {{ loading() ? 'Guardando...' : 'Guardar datos' }}
+      </button>
+    </div>
+
+  </form>
+</div>

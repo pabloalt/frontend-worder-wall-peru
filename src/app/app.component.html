@@ -1,0 +1,109 @@
+<mat-sidenav-container class="app-container">
+
+  <!-- Sidenav -->
+  <mat-sidenav
+    #sidenav
+    [opened]="menuAbierto()"
+    (closedStart)="cerrarMenu()"
+    mode="over"
+    class="app-sidenav">
+
+    <!-- Cabecera del sidenav -->
+    <div class="sidenav-header">
+      <span class="sidenav-title">🎂 {{ title }}</span>
+      <button mat-icon-button (click)="cerrarMenu()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <mat-nav-list>
+      <!-- Navegación siempre visible -->
+      <a mat-list-item
+         routerLink="/admin/dashboard"
+         routerLinkActive="active-nav-item"
+         (click)="cerrarMenu()">
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle>Dashboard</span>
+      </a>
+
+      <a mat-list-item
+         routerLink="/admin/pedidos"
+         routerLinkActive="active-nav-item"
+         (click)="cerrarMenu()">
+        <mat-icon matListItemIcon>list_alt</mat-icon>
+        <span matListItemTitle>Pedidos</span>
+      </a>
+
+      <a mat-list-item
+         routerLink="/admin/clientes"
+         routerLinkActive="active-nav-item"
+         (click)="cerrarMenu()">
+        <mat-icon matListItemIcon>people</mat-icon>
+        <span matListItemTitle>Clientes</span>
+      </a>
+
+      <a mat-list-item
+         routerLink="/"
+         routerLinkActive="active-nav-item"
+         [routerLinkActiveOptions]="{exact: true}"
+         (click)="cerrarMenu()">
+        <mat-icon matListItemIcon>edit_note</mat-icon>
+        <span matListItemTitle>Registrar Pedido</span>
+      </a>
+
+      <mat-divider></mat-divider>
+
+      <!-- Sesión -->
+      <ng-container *ngIf="auth.isAuthenticated(); else sinSesionTpl">
+        <div class="sidenav-user" *ngIf="auth.currentUser()?.name">
+          <mat-icon>account_circle</mat-icon>
+          <span>{{ auth.currentUser()?.name }}</span>
+        </div>
+        <a mat-list-item (click)="auth.logout(); cerrarMenu()" class="logout-item">
+          <mat-icon matListItemIcon>logout</mat-icon>
+          <span matListItemTitle>Cerrar sesión</span>
+        </a>
+      </ng-container>
+      <ng-template #sinSesionTpl>
+        <a mat-list-item (click)="auth.login(); cerrarMenu()">
+          <mat-icon matListItemIcon>login</mat-icon>
+          <span matListItemTitle>Iniciar sesión (Admin)</span>
+        </a>
+      </ng-template>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <!-- Contenido principal -->
+  <mat-sidenav-content>
+
+    <!-- Toolbar -->
+    <mat-toolbar color="primary" class="app-toolbar">
+      <button mat-icon-button (click)="toggleMenu()" aria-label="Menú">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="toolbar-title">🎂 {{ title }}</span>
+      <span class="spacer"></span>
+
+      <!-- Acceso rápido sesión en toolbar -->
+      <ng-container *ngIf="!auth.isAuthenticated()">
+        <button mat-button (click)="auth.login()">
+          <mat-icon>login</mat-icon> Admin
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="auth.isAuthenticated()">
+        <span class="user-name">{{ auth.currentUser()?.name }}</span>
+        <button mat-icon-button (click)="auth.logout()" matTooltip="Cerrar sesión">
+          <mat-icon>logout</mat-icon>
+        </button>
+      </ng-container>
+    </mat-toolbar>
+
+    <!-- Vista del router -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </mat-sidenav-content>
+</mat-sidenav-container>
+

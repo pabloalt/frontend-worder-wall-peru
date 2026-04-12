@@ -1,0 +1,179 @@
+<div class="page-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>people</mat-icon> Clientes
+    </h1>
+    <div class="header-actions">
+      <button mat-stroked-button color="accent" (click)="toggleEnlace()" matTooltip="Compartir enlace de registro con un cliente">
+        <mat-icon>person_add</mat-icon> Nuevo Cliente
+      </button>
+      <button mat-raised-button color="primary" (click)="ngOnInit()">
+        <mat-icon>refresh</mat-icon> Actualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Panel enlace externo -->
+  <div class="enlace-panel" *ngIf="mostrarEnlace()">
+    <mat-icon class="enlace-icon">link</mat-icon>
+    <span class="enlace-label">Enlace de registro:</span>
+    <code class="enlace-url">{{ enlaceRegistro }}</code>
+    <div class="enlace-acciones">
+      <button mat-icon-button (click)="copiarEnlace()" matTooltip="Copiar enlace">
+        <mat-icon>content_copy</mat-icon>
+      </button>
+      <button mat-icon-button (click)="abrirEnlace()" matTooltip="Abrir en nueva pestaña">
+        <mat-icon>open_in_new</mat-icon>
+      </button>
+      <button mat-icon-button class="whatsapp-btn" (click)="compartirWhatsApp()" matTooltip="Enviar por WhatsApp">
+        <mat-icon>chat</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row" *ngIf="!loading()">
+    <div class="stat-chip">
+      <mat-icon>group</mat-icon>
+      <span><strong>{{ total() }}</strong> clientes</span>
+    </div>
+    <div class="stat-chip ok">
+      <mat-icon>picture_as_pdf</mat-icon>
+      <span><strong>{{ conContrato() }}</strong> con contrato</span>
+    </div>
+    <div class="stat-chip warn" *ngIf="sinContrato() > 0">
+      <mat-icon>warning</mat-icon>
+      <span><strong>{{ sinContrato() }}</strong> sin contrato</span>
+    </div>
+  </div>
+
+  <!-- Buscador -->
+  <mat-form-field appearance="outline" class="search-field" *ngIf="!loading()">
+    <mat-label>Buscar cliente</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput
+           [ngModel]="busqueda()"
+           (ngModelChange)="busqueda.set($event)"
+           placeholder="Nombre, DNI, celular o email..." />
+    <button mat-icon-button matSuffix *ngIf="busqueda()" (click)="busqueda.set('')">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+
+  <!-- Spinner -->
+  <div *ngIf="loading()" class="loading-center">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Tabla -->
+  <mat-card *ngIf="!loading()">
+    <mat-card-content>
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="clientesFiltrados()" class="mat-elevation-z0">
+
+          <!-- Cliente -->
+          <ng-container matColumnDef="cliente">
+            <th mat-header-cell *matHeaderCellDef>Cliente</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="cliente-cell">
+                <strong>{{ row.nombreCliente }}</strong>
+                <small class="dni">DNI: {{ row.dni }}</small>
+                <small class="fecha">Desde {{ row.creadoEn | date:'dd/MM/yyyy' }}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Contacto -->
+          <ng-container matColumnDef="contacto">
+            <th mat-header-cell *matHeaderCellDef>Contacto</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="contacto-cell">
+                <span *ngIf="row.celular" class="contacto-row">
+                  <button mat-icon-button class="action-sm"
+                          (click)="contactarWhatsApp(row.celular)"
+                          matTooltip="WhatsApp">
+                    <mat-icon class="whatsapp-icon">chat</mat-icon>
+                  </button>
+                  {{ row.celular }}
+                </span>
+                <span *ngIf="row.email" class="contacto-row">
+                  <button mat-icon-button class="action-sm"
+                          (click)="contactarEmail(row.email)"
+                          matTooltip="Enviar correo">
+                    <mat-icon>email</mat-icon>
+                  </button>
+                  <small>{{ row.email }}</small>
+                </span>
+                <span *ngIf="!row.celular && !row.email" class="sin-contacto">
+                  <mat-icon>info</mat-icon> Sin datos
+                </span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- N.º Pedidos -->
+          <ng-container matColumnDef="pedidos">
+            <th mat-header-cell *matHeaderCellDef>Pedidos</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="badge-pedidos">{{ row.pedidos.length }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Última boda -->
+          <ng-container matColumnDef="ultimaBoda">
+            <th mat-header-cell *matHeaderCellDef>Última boda</th>
+            <td mat-cell *matCellDef="let row">
+              {{ row.ultimoPedido.fechaBoda | date:'dd/MM/yyyy' }}
+            </td>
+          </ng-container>
+
+          <!-- Estado último pedido -->
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let row">
+              <mat-chip [color]="getEstadoColor(row.ultimoPedido.estado)" selected>
+                {{ row.ultimoPedido.estado }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Contrato (acciones) -->
+          <ng-container matColumnDef="contrato">
+            <th mat-header-cell *matHeaderCellDef>Contrato</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="contrato-acciones" *ngIf="row.ultimoPedido.contratoPdfUrl; else sinContratoTpl">
+                <button mat-icon-button color="primary"
+                        (click)="verContrato(row.ultimoPedido.contratoPdfUrl!)"
+                        matTooltip="Ver PDF">
+                  <mat-icon>picture_as_pdf</mat-icon>
+                </button>
+                <button mat-icon-button
+                        (click)="imprimirContrato(row.ultimoPedido.contratoPdfUrl!)"
+                        matTooltip="Imprimir contrato">
+                  <mat-icon>print</mat-icon>
+                </button>
+              </div>
+              <ng-template #sinContratoTpl>
+                <mat-icon color="warn" matTooltip="Sin contrato generado">cloud_off</mat-icon>
+              </ng-template>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          <!-- Sin resultados -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell empty-row" [attr.colspan]="displayedColumns.length">
+              <mat-icon>person_search</mat-icon>
+              {{ busqueda() ? 'No se encontraron clientes con "' + busqueda() + '"' : 'No hay clientes registrados.' }}
+            </td>
+          </tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+</div>
