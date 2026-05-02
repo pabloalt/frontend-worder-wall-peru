@@ -45,12 +45,9 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    // Si bypassAuth está activo, usar adminToken configurado
-    if ((environment as any).bypassAuth && (environment as any).adminToken) {
-      return (environment as any).adminToken;
-    }
-    // En producción sin bypassAuth, Azure SWA maneja auth via cookies
-    return null;
+    // En producción con testing, usar token hardcodeado
+    // TODO: Reemplazar con auth real de Azure SWA
+    return 'wonderwall-dev-token-2026';
   }
 
   login(): void {

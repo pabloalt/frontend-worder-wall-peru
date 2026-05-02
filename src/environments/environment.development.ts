@@ -1,4 +1,6 @@
-export const environment = {
+import { Environment } from './environment.interface';
+
+export const environment: Environment = {
   production: false,
   apiUrl: 'http://localhost:7211/api',
   bypassAuth: true,   // solo desarrollo: permite acceder a /admin sin login
