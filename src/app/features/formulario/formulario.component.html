@@ -197,9 +197,11 @@
         <!-- Importe total con desglose IGV -->
         <div class="importe-grid">
           <mat-form-field appearance="outline">
-            <mat-label>Importe Total (con IGV)</mat-label>
+            <mat-label>Importe Total (con IGV) *</mat-label>
             <span matPrefix>S/&nbsp;</span>
             <input matInput type="number" formControlName="importeTotal" min="0" step="0.01" placeholder="0.00">
+            <mat-error *ngIf="form.get('importeTotal')?.hasError('required')">El importe total es requerido</mat-error>
+            <mat-error *ngIf="form.get('importeTotal')?.hasError('min')">El importe debe ser mayor a 0</mat-error>
           </mat-form-field>
 
           <div class="igv-desglose" *ngIf="(form.get('importeTotal')?.value ?? 0) > 0">

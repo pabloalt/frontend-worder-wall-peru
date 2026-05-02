@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -12,9 +12,19 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ClienteService } from '../../core/services/cliente.service';
+import { ToastService } from '../../core/services/toast.service';
+import { collectFormErrors } from '../../core/utils/form-errors.util';
 import { CrearClienteRequest } from '../../core/models';
+
+const LABELS: Record<string, string> = {
+  tipoDocumento:   'Tipo de documento',
+  numeroDocumento: 'Número de documento',
+  nombres:         'Nombres',
+  apellidoPaterno: 'Apellido paterno',
+  fechaBoda:       'Fecha de boda',
+  email:           'Email',
+};
 
 @Component({
   standalone: true,
@@ -34,10 +44,14 @@ import { CrearClienteRequest } from '../../core/models';
     MatDatepickerModule,
     MatNativeDateModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule,
   ]
 })
 export class RegistroClienteComponent implements OnInit {
+  private fb            = inject(FormBuilder);
+  private route         = inject(ActivatedRoute);
+  private clienteService = inject(ClienteService);
+  private toast         = inject(ToastService);
+
   form: FormGroup;
   loading        = signal(false);
   success        = signal(false);
@@ -48,12 +62,7 @@ export class RegistroClienteComponent implements OnInit {
 
   private token = '';
 
-  constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private clienteService: ClienteService,
-    private snackBar: MatSnackBar
-  ) {
+  constructor() {
     this.form = this.fb.group({
       tipoDocumento:            ['DNI', Validators.required],
       numeroDocumento:          ['', Validators.required],
@@ -100,6 +109,7 @@ export class RegistroClienteComponent implements OnInit {
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      collectFormErrors(this.form, LABELS).forEach(msg => this.toast.error(msg));
       return;
     }
 
@@ -132,7 +142,7 @@ export class RegistroClienteComponent implements OnInit {
       },
       error: () => {
         this.loading.set(false);
-        this.snackBar.open('Error al guardar los datos. Intente nuevamente.', '✗', { duration: 4000 });
+        this.toast.error('Error al guardar los datos. Intente nuevamente.');
       }
     });
   }

@@ -10,9 +10,20 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ActualizarClienteRequest, Cliente } from '../../core/models';
 import { ClienteService } from '../../core/services/cliente.service';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/services/toast.service';
+import { collectFormErrors } from '../../core/utils/form-errors.util';
+
+const LABELS: Record<string, string> = {
+  tipoDocumento:   'Tipo de documento',
+  numeroDocumento: 'Número de documento',
+  nombres:         'Nombres',
+  apellidoPaterno: 'Apellido paterno',
+  fechaBoda:       'Fecha de boda',
+  email:           'Email',
+};
 
 @Component({
   standalone: true,
@@ -31,37 +42,46 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     MatDatepickerModule,
     MatNativeDateModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule,
+    MatCheckboxModule,
   ]
 })
 export class EditarClienteDialogComponent {
-  private fb         = inject(FormBuilder);
-  private dialogRef  = inject(MatDialogRef<EditarClienteDialogComponent>);
-  private service    = inject(ClienteService);
-  private snackBar   = inject(MatSnackBar);
+  private fb        = inject(FormBuilder);
+  private dialogRef = inject(MatDialogRef<EditarClienteDialogComponent>);
+  private service   = inject(ClienteService);
+  private toast     = inject(ToastService);
   readonly cliente: Cliente = inject(MAT_DIALOG_DATA);
 
   guardando = false;
 
   form = this.fb.group({
-    tipoDocumento:    [this.cliente.tipoDocumento, Validators.required],
-    numeroDocumento:  [this.cliente.numeroDocumento, Validators.required],
-    nombres:          [this.cliente.nombres, [Validators.required, Validators.minLength(2)]],
-    apellidoPaterno:  [this.cliente.apellidoPaterno, Validators.required],
-    apellidoMaterno:  [this.cliente.apellidoMaterno ?? ''],
-    fechaCumpleanios: [this.cliente.fechaCumpleanios ? new Date(this.cliente.fechaCumpleanios) : null as Date | null],
-    fechaBoda:        [new Date(this.cliente.fechaBoda), Validators.required],
-    celular:          [this.cliente.celular ?? ''],
-    email:            [this.cliente.email ?? '', Validators.email],
+    tipoDocumento:            [this.cliente.tipoDocumento, Validators.required],
+    numeroDocumento:          [this.cliente.numeroDocumento, Validators.required],
+    nombres:                  [this.cliente.nombres, [Validators.required, Validators.minLength(2)]],
+    apellidoPaterno:          [this.cliente.apellidoPaterno, Validators.required],
+    apellidoMaterno:          [this.cliente.apellidoMaterno ?? ''],
+    fechaCumpleanios:         [this.cliente.fechaCumpleanios ? new Date(this.cliente.fechaCumpleanios) : null as Date | null],
+    fechaBoda:                [new Date(this.cliente.fechaBoda), Validators.required],
+    celular:                  [this.cliente.celular ?? ''],
+    email:                    [this.cliente.email ?? '', Validators.email],
+    nombreLocal:              [this.cliente.logistica?.nombreLocal ?? ''],
+    direccion:                [this.cliente.logistica?.direccion ?? ''],
+    ubicacionMaps:            [this.cliente.logistica?.ubicacionMaps ?? ''],
+    horaLlegada:              [this.cliente.logistica?.horaLlegada ?? ''],
+    horaLlegadaPorConfirmar:  [!this.cliente.logistica?.horaLlegada],
   });
 
   guardar(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      collectFormErrors(this.form, LABELS).forEach(msg => this.toast.error(msg));
       return;
     }
 
     const val = this.form.value;
+    const tieneLogistica = val.nombreLocal || val.direccion || val.ubicacionMaps ||
+                           (!val.horaLlegadaPorConfirmar && val.horaLlegada);
+
     const request: ActualizarClienteRequest = {
       tipoDocumento:    val.tipoDocumento!,
       numeroDocumento:  val.numeroDocumento!,
@@ -72,6 +92,12 @@ export class EditarClienteDialogComponent {
       fechaBoda:        (val.fechaBoda as Date).toISOString(),
       celular:          val.celular || undefined,
       email:            val.email || undefined,
+      logistica: tieneLogistica ? {
+        nombreLocal:   val.nombreLocal || undefined,
+        direccion:     val.direccion || undefined,
+        ubicacionMaps: val.ubicacionMaps || undefined,
+        horaLlegada:   val.horaLlegadaPorConfirmar ? undefined : val.horaLlegada || undefined,
+      } : undefined,
     };
 
     this.guardando = true;
@@ -82,7 +108,7 @@ export class EditarClienteDialogComponent {
       },
       error: () => {
         this.guardando = false;
-        this.snackBar.open('Error al actualizar el cliente', '✗', { duration: 4000 });
+        this.toast.error('Error al actualizar el cliente.');
       }
     });
   }

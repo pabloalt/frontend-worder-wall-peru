@@ -49,70 +49,22 @@
       </mat-card>
     </div>
 
-    <!-- Calendario de Bodas -->
-    <mat-card class="upcoming-card">
+    <!-- Google Calendar -->
+    <mat-card class="calendar-card">
       <mat-card-header>
         <mat-card-title>
           <mat-icon>calendar_month</mat-icon> Calendario de Bodas
         </mat-card-title>
-        <span class="spacer"></span>
-        <button mat-icon-button (click)="mesPrevio()" matTooltip="Mes anterior">
-          <mat-icon>chevron_left</mat-icon>
-        </button>
-        <span class="mes-label">{{ mesLabel() }}</span>
-        <button mat-icon-button (click)="mesSiguiente()" matTooltip="Mes siguiente">
-          <mat-icon>chevron_right</mat-icon>
-        </button>
       </mat-card-header>
-
       <mat-card-content>
-        <!-- Cabecera días semana -->
-        <div class="cal-grid">
-          <div class="cal-dow" *ngFor="let d of diasSemana">{{ d }}</div>
-
-          <!-- Celdas -->
-          <div *ngFor="let dia of diasCalendario()"
-               class="cal-cell"
-               [class.otro-mes]="!dia.esDelMes"
-               [class.hoy]="dia.esHoy"
-               [class.tiene-pedidos]="dia.pedidos.length > 0"
-               [class.seleccionado]="diaSeleccionado()?.fecha?.toDateString() === dia.fecha.toDateString()"
-               (click)="seleccionarDia(dia)">
-            <span class="cal-num">{{ dia.fecha.getDate() }}</span>
-            <div class="cal-dots">
-              <span *ngFor="let p of dia.pedidos"
-                    class="dot"
-                    [style.background]="getEstadoBg(p.estado)"
-                    [matTooltip]="p.nombreCliente">
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Panel detalle día seleccionado -->
-        <div class="dia-detalle" *ngIf="diaSeleccionado()">
-          <h4>
-            <mat-icon>event</mat-icon>
-            Bodas del {{ formatearFecha(diaSeleccionado()!.fecha) }}
-          </h4>
-          <div *ngFor="let p of diaSeleccionado()!.pedidos" class="detalle-boda-row">
-            <div class="detalle-boda-info">
-              <strong>{{ p.nombreCliente }}</strong>
-              <small>{{ p.celular }}</small>
-            </div>
-            <mat-chip [color]="getEstadoColor(p.estado)" selected>{{ p.estado }}</mat-chip>
-            <a *ngIf="p.contratoPdfUrl" [href]="p.contratoPdfUrl" target="_blank"
-               mat-icon-button color="primary" matTooltip="Ver contrato">
-              <mat-icon>picture_as_pdf</mat-icon>
-            </a>
-          </div>
-        </div>
-
-        <!-- Leyenda -->
-        <div class="cal-leyenda">
-          <span><span class="dot" style="background:#ff9800"></span> Cotizado</span>
-          <span><span class="dot" style="background:#3E6F57"></span> Pagado</span>
-          <span><span class="dot" style="background:#9e9e9e"></span> Entregado</span>
+        <div class="calendar-wrapper">
+          <iframe
+            [src]="calendarUrl"
+            class="google-calendar"
+            frameborder="0"
+            scrolling="no"
+            title="Calendario de bodas">
+          </iframe>
         </div>
       </mat-card-content>
     </mat-card>

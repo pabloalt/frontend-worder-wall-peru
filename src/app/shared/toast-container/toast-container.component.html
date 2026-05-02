@@ -1,0 +1,11 @@
+<div class="toast-wrapper">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div class="toast toast--{{ toast.type }}">
+      <mat-icon class="toast-icon">{{ iconFor(toast.type) }}</mat-icon>
+      <span class="toast-message">{{ toast.message }}</span>
+      <button mat-icon-button class="toast-close" (click)="toastService.dismiss(toast.id)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+</div>

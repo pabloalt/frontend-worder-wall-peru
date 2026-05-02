@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Find all *)",
+      "Bash(Sort-Object FullName)",
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Recurse -Filter \"*.cs\")",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(git -C \"C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\backend\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\frontend\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\frontend\" log --oneline -5)",
+      "Bash(git -C \"C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\backend\" log --oneline -5)",
+      "Bash(git -C \"C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\frontend\" diff --stat HEAD)",
+      "Bash(git -C \"C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\backend\" diff --stat HEAD)",
+      "Bash(git -C \"C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\frontend\" add angular.json src/app/app.routes.ts src/app/core/interceptors/auth.interceptor.ts src/app/core/models/pedido.model.ts src/app/core/services/auth.service.ts src/app/core/services/cliente.service.ts src/app/core/services/pedido.service.ts src/app/features/clientes/clientes.component.html src/app/features/clientes/clientes.component.scss src/app/features/clientes/clientes.component.ts src/app/features/clientes/editar-cliente-dialog.component.html src/app/features/clientes/editar-cliente-dialog.component.scss src/app/features/clientes/editar-cliente-dialog.component.ts src/app/features/formulario/formulario.component.html src/app/features/formulario/formulario.component.scss src/app/features/formulario/formulario.component.ts src/app/features/registro-cliente/registro-cliente.component.html src/app/features/registro-cliente/registro-cliente.component.scss src/app/features/registro-cliente/registro-cliente.component.ts src/environments/environment.development.ts src/environments/environment.ts tsconfig.json src/app/core/utils/)",
+      "Bash(git -C 'C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\frontend' commit -m ' *)",
+      "Bash(git -C \"C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\backend\" add Functions/ClientesFunction.cs Functions/TokensFunction.cs Functions/PedidosFunction.cs Models/CreateClienteRequest.cs Models/UpdateClienteRequest.cs Models/Cliente.cs Models/ClienteResponse.cs Models/LogisticaCliente.cs Models/LogisticaClienteRequest.cs Models/LogisticaClienteResponse.cs Models/LogisticaPedido.cs Models/Token.cs Models/TokenResponse.cs Models/ValidarTokenResponse.cs Models/Pedido.cs Models/PedidoResponse.cs Models/CreatePedidoRequest.cs Models/CuotaPago.cs Models/DetallePedido.cs Models/Pago.cs Models/Logistica.cs Services/ClienteService.cs Services/IClienteService.cs Services/AuthService.cs Services/IAuthService.cs Services/TokenService.cs Services/ITokenService.cs Services/PedidoService.cs Services/IPedidoService.cs Services/TokenInvalidoException.cs Data/WonderWallDbContext.cs Data/Migrations/ Program.cs)",
+      "Bash(git -C 'C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\backend' commit -m ' *)",
+      "Bash(git -C \"C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\frontend\" push origin develop)",
+      "Bash(git -C \"C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\backend\" push origin develop)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\frontend\" -Recurse -Filter \"*pedido*\" -ErrorAction SilentlyContinue)",
+      "Read(//c/Users/Pablo/Documents/Personal/wonderwall/Proyecto/**)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\Pablo\\Documents\\Personal\\wonderwall\\Proyecto\\backend\\Functions",
+      "C:\\Users\\Pablo\\Documents\\Personal\\wonderwall\\Proyecto\\backend\\Models",
+      "C:\\Users\\Pablo\\Documents\\Personal\\wonderwall\\Proyecto\\backend\\Services",
+      "C:\\Users\\Pablo\\Documents\\Personal\\wonderwall\\Proyecto\\backend\\Data"
+    ]
+  }
+}

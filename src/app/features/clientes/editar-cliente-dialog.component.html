@@ -74,6 +74,45 @@
       </mat-form-field>
     </div>
 
+    <!-- Logística -->
+    <div class="seccion-titulo">
+      <mat-icon>local_shipping</mat-icon>
+      <span>Logística de Entrega</span>
+      <span class="opcional">(Opcional)</span>
+    </div>
+
+    <div class="form-row cols-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre del Local</mat-label>
+        <input matInput formControlName="nombreLocal" placeholder="Ej: Salón Los Jardines">
+      </mat-form-field>
+
+      <div class="hora-llegada-wrapper">
+        <mat-form-field appearance="outline">
+          <mat-label>Hora de Llegada</mat-label>
+          <input matInput formControlName="horaLlegada" type="time"
+            [attr.disabled]="form.get('horaLlegadaPorConfirmar')?.value ? '' : null">
+          <mat-hint>Formato: HH:MM (24 hs)</mat-hint>
+        </mat-form-field>
+        <mat-checkbox formControlName="horaLlegadaPorConfirmar">Por confirmar</mat-checkbox>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Dirección</mat-label>
+        <input matInput formControlName="direccion" placeholder="Av. Los Álamos 123, Lima">
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Link de Google Maps</mat-label>
+        <input matInput formControlName="ubicacionMaps" placeholder="https://maps.google.com/...">
+        <mat-icon matSuffix>map</mat-icon>
+      </mat-form-field>
+    </div>
+
   </form>
 </mat-dialog-content>
 

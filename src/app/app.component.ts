@@ -9,6 +9,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from './core/services/auth.service';
+import { ToastContainerComponent } from './shared/toast-container/toast-container.component';
 
 @Component({
   standalone: true,
@@ -27,6 +28,7 @@ import { AuthService } from './core/services/auth.service';
     MatButtonModule,
     MatTooltipModule,
     MatDividerModule,
+    ToastContainerComponent,
   ]
 })
 export class AppComponent implements OnInit {

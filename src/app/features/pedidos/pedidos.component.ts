@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
@@ -9,8 +9,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { PedidoService } from '../../core/services/pedido.service';
+import { ToastService } from '../../core/services/toast.service';
 import { EstadoPedido, Pedido } from '../../core/models';
 
 @Component({
@@ -29,19 +29,16 @@ import { EstadoPedido, Pedido } from '../../core/models';
     MatSelectModule,
     MatFormFieldModule,
     MatTooltipModule,
-    MatSnackBarModule,
   ]
 })
 export class PedidosComponent implements OnInit {
-  pedidos = signal<Pedido[]>([]);
-  loading = signal(true);
-  displayedColumns = ['cliente', 'fechaBoda', 'estado', 'detalles', 'contrato', 'acciones'];
-  estados = Object.values(EstadoPedido);
+  private pedidoService = inject(PedidoService);
+  private toast         = inject(ToastService);
 
-  constructor(
-    private pedidoService: PedidoService,
-    private snackBar: MatSnackBar
-  ) {}
+  pedidos          = signal<Pedido[]>([]);
+  loading          = signal(true);
+  displayedColumns = ['cliente', 'fechaBoda', 'estado', 'detalles', 'contrato', 'acciones'];
+  estados          = Object.values(EstadoPedido);
 
   ngOnInit(): void {
     this.cargarPedidos();
@@ -54,7 +51,10 @@ export class PedidosComponent implements OnInit {
         this.pedidos.set(data);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false)
+      error: () => {
+        this.loading.set(false);
+        this.toast.error('Error al cargar los pedidos.');
+      }
     });
   }
 
@@ -64,9 +64,9 @@ export class PedidosComponent implements OnInit {
         this.pedidos.update(list =>
           list.map(p => p.id === actualizado.id ? actualizado : p)
         );
-        this.snackBar.open(`Estado actualizado a ${nuevoEstado}`, '✓', { duration: 3000 });
+        this.toast.success(`Estado actualizado a ${nuevoEstado}.`);
       },
-      error: () => this.snackBar.open('Error al actualizar estado', '✗', { duration: 3000 })
+      error: () => this.toast.error('Error al actualizar el estado del pedido.')
     });
   }
 
@@ -76,8 +76,8 @@ export class PedidosComponent implements OnInit {
 
   getEstadoColor(estado: EstadoPedido): string {
     const map: Record<EstadoPedido, string> = {
-      [EstadoPedido.Cotizado]: 'accent',
-      [EstadoPedido.Pagado]:   'primary',
+      [EstadoPedido.Cotizado]:  'accent',
+      [EstadoPedido.Pagado]:    'primary',
       [EstadoPedido.Entregado]: '',
     };
     return map[estado] ?? '';
