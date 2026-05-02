@@ -45,11 +45,11 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    // En desarrollo, usar token hardcodeado para backend local
-    if (!environment.production && (environment as any).adminToken) {
+    // Si bypassAuth está activo, usar adminToken configurado
+    if ((environment as any).bypassAuth && (environment as any).adminToken) {
       return (environment as any).adminToken;
     }
-    // En producción, Azure SWA maneja auth via cookies, no local JWT
+    // En producción sin bypassAuth, Azure SWA maneja auth via cookies
     return null;
   }
 

@@ -1,0 +1,220 @@
+{
+  "info": {
+    "name": "Wonderwall API - Production",
+    "_postman_id": "wonderwall-api-prod",
+    "description": "API de Wonderwall Catering - Ambiente de Producción",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Clientes",
+      "item": [
+        {
+          "name": "GET Listar Clientes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes"]
+            }
+          }
+        },
+        {
+          "name": "POST Crear Cliente (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"MARIA GARCIA\",\n  \"dni\": \"87654321\",\n  \"celular\": \"912345678\",\n  \"email\": \"MARIA@GMAIL.COM\",\n  \"fechaCumpleanios\": \"1985-05-20\",\n  \"logistica\": {\n    \"direccion\": \"CALLE LOS OLIVOS 456\",\n    \"referencia\": \"FRENTE AL MERCADO\",\n    \"distrito\": \"SAN ISIDRO\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes"]
+            }
+          }
+        },
+        {
+          "name": "PUT Actualizar Cliente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"JUAN PEREZ ACTUALIZADO\",\n  \"dni\": \"12345678\",\n  \"celular\": \"987654322\",\n  \"email\": \"JUANPEREZ@GMAIL.COM\",\n  \"fechaCumpleanios\": \"1990-01-15\",\n  \"logistica\": {\n    \"direccion\": \"AV. LIMA 124\",\n    \"referencia\": \"CERCA AL PARQUE CENTRAL\",\n    \"distrito\": \"MIRAFLORES\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST Registro Público (Sin Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"LAURA TORRES\",\n  \"dni\": \"78945612\",\n  \"celular\": \"945612378\",\n  \"email\": \"LAURA@GMAIL.COM\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes/registro",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes", "registro"]
+            }
+          }
+        },
+        {
+          "name": "POST Validar Token Cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"PEGAR_TOKEN_AQUI\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes/validar-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes", "validar-token"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pedidos",
+      "item": [
+        {
+          "name": "GET Listar Pedidos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos"]
+            }
+          }
+        },
+        {
+          "name": "POST Crear Pedido Completo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"CARLOS RODRIGUEZ\",\n  \"dni\": \"45678912\",\n  \"celular\": \"998877665\",\n  \"email\": \"CARLOS@GMAIL.COM\",\n  \"fechaBoda\": \"2026-08-20T16:00:00\",\n  \"detalles\": [\n    {\n      \"categoria\": \"TORTAS\",\n      \"sabor\": \"CHOCOLATE\",\n      \"relleno\": \"MANJAR BLANCO\",\n      \"cobertura\": \"FONDANT\",\n      \"peso\": \"5KG\",\n      \"pisos\": 3,\n      \"forma\": \"REDONDA\",\n      \"decoracion\": \"FLORES NATURALES\",\n      \"cantidad\": 1,\n      \"precioUnitario\": 350.00,\n      \"subtotal\": 350.00\n    },\n    {\n      \"categoria\": \"BOCADITOS SALADOS\",\n      \"tipoUnidad\": \"DOCENAS\",\n      \"cantidad\": 10,\n      \"precioUnitario\": 25.00,\n      \"subtotal\": 250.00\n    }\n  ],\n  \"pago\": {\n    \"adelanto\": 200.00,\n    \"saldo\": 400.00,\n    \"metodoPago\": \"TRANSFERENCIA\",\n    \"fechaPago\": \"2026-05-03T10:00:00\"\n  },\n  \"logistica\": {\n    \"direccion\": \"AV. AREQUIPA 789\",\n    \"referencia\": \"AL LADO DEL HOTEL\",\n    \"distrito\": \"LINCE\",\n    \"horaEntrega\": \"15:00\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos"]
+            }
+          }
+        },
+        {
+          "name": "POST Crear Pedido Simple",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"ANA MARTINEZ\",\n  \"dni\": \"32165498\",\n  \"celular\": \"923456789\",\n  \"email\": \"ANA@GMAIL.COM\",\n  \"fechaBoda\": \"2026-07-15T18:00:00\",\n  \"detalles\": [\n    {\n      \"categoria\": \"TORTAS\",\n      \"sabor\": \"VAINILLA\",\n      \"relleno\": \"FRUTAS\",\n      \"cobertura\": \"CREMA\",\n      \"peso\": \"3KG\",\n      \"pisos\": 2,\n      \"forma\": \"CUADRADA\",\n      \"decoracion\": \"SIMPLE\",\n      \"cantidad\": 1,\n      \"precioUnitario\": 250.00,\n      \"subtotal\": 250.00\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://wonderwall-api.azurewebsites.net/api",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "wonderwall-dev-token-2026",
+      "type": "string"
+    }
+  ]
+}
