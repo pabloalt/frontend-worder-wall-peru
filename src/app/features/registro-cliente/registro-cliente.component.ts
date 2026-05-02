@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -36,32 +37,63 @@ import { CrearClienteRequest } from '../../core/models';
     MatSnackBarModule,
   ]
 })
-export class RegistroClienteComponent {
+export class RegistroClienteComponent implements OnInit {
   form: FormGroup;
-  loading = signal(false);
-  success = signal(false);
-  minDate = new Date();
+  loading        = signal(false);
+  success        = signal(false);
+  validandoToken = signal(true);
+  tokenValido    = signal(false);
+  motivoInvalido = signal('');
+  get minDate(): Date { return new Date(); }
+
+  private token = '';
 
   constructor(
     private fb: FormBuilder,
+    private route: ActivatedRoute,
     private clienteService: ClienteService,
     private snackBar: MatSnackBar
   ) {
     this.form = this.fb.group({
-      tipoDocumento:    ['DNI', Validators.required],
-      numeroDocumento:  ['', Validators.required],
-      nombres:          ['', [Validators.required, Validators.minLength(2)]],
-      apellidoPaterno:  ['', Validators.required],
-      apellidoMaterno:  [''],
-      fechaCumpleanios: [null],
-      fechaBoda:        [null, Validators.required],
-      celular:          [''],
-      email:            ['', [Validators.email]],
-      nombreLocal:      [''],
-      direccion:        [''],
-      ubicacionMaps:              [''],
-      horaLlegada:                [''],
-      horaLlegadaPorConfirmar:    [true],
+      tipoDocumento:            ['DNI', Validators.required],
+      numeroDocumento:          ['', Validators.required],
+      nombres:                  ['', [Validators.required, Validators.minLength(2)]],
+      apellidoPaterno:          ['', Validators.required],
+      apellidoMaterno:          [''],
+      fechaCumpleanios:         [null],
+      fechaBoda:                [null, Validators.required],
+      celular:                  [''],
+      email:                    ['', [Validators.email]],
+      nombreLocal:              [''],
+      direccion:                [''],
+      ubicacionMaps:            [''],
+      horaLlegada:              [''],
+      horaLlegadaPorConfirmar:  [true],
+    });
+  }
+
+  ngOnInit(): void {
+    const token = this.route.snapshot.queryParamMap.get('token');
+
+    if (!token) {
+      this.validandoToken.set(false);
+      this.tokenValido.set(false);
+      this.motivoInvalido.set('El enlace no contiene un token de acceso.');
+      return;
+    }
+
+    this.token = token;
+    this.clienteService.validarToken(token).subscribe({
+      next: ({ valido, motivo }) => {
+        this.validandoToken.set(false);
+        this.tokenValido.set(valido);
+        if (!valido) this.motivoInvalido.set(this.mensajePorMotivo(motivo));
+      },
+      error: () => {
+        this.validandoToken.set(false);
+        this.tokenValido.set(false);
+        this.motivoInvalido.set('No se pudo verificar el enlace. Intente más tarde.');
+      }
     });
   }
 
@@ -88,6 +120,7 @@ export class RegistroClienteComponent {
         ubicacionMaps: val.ubicacionMaps || undefined,
         horaLlegada:   (!val.horaLlegadaPorConfirmar && val.horaLlegada) ? val.horaLlegada : undefined,
       } : undefined,
+      token: this.token,
     };
 
     this.loading.set(true);
@@ -106,5 +139,14 @@ export class RegistroClienteComponent {
 
   nuevoRegistro(): void {
     this.success.set(false);
+  }
+
+  private mensajePorMotivo(motivo?: string): string {
+    switch (motivo) {
+      case 'EXPIRADO':      return 'El enlace ha expirado. Solicita uno nuevo.';
+      case 'USADO':         return 'Este enlace ya fue utilizado para un registro.';
+      case 'NO_ENCONTRADO': return 'El enlace no es válido.';
+      default:              return 'El enlace no es válido o ya no está disponible.';
+    }
   }
 }

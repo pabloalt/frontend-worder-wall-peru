@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Cliente, CrearClienteRequest } from '../models';
-
-const MOCK_CLIENTES: Cliente[] = [];
+import { ActualizarClienteRequest, Cliente, CrearClienteRequest, GenerarTokenResponse, ValidarTokenResponse } from '../models';
+import { toUppercaseDeep } from '../utils/uppercase.util';
 
 @Injectable({ providedIn: 'root' })
 export class ClienteService {
@@ -13,37 +12,26 @@ export class ClienteService {
   constructor(private http: HttpClient) {}
 
   crearCliente(request: CrearClienteRequest): Observable<Cliente> {
-    if (!environment.production) {
-      const nuevo: Cliente = {
-        id: Date.now(),
-        tipoDocumento:    request.tipoDocumento,
-        numeroDocumento:  request.numeroDocumento,
-        nombres:          request.nombres,
-        apellidoPaterno:  request.apellidoPaterno,
-        apellidoMaterno:  request.apellidoMaterno,
-        fechaCumpleanios: request.fechaCumpleanios,
-        fechaBoda:        request.fechaBoda,
-        celular:          request.celular,
-        email:            request.email,
-        creadoEn:         new Date().toISOString(),
-      };
-      MOCK_CLIENTES.push(nuevo);
-      return of(nuevo);
-    }
-    return this.http.post<Cliente>(this.base, request);
+    return this.http.post<Cliente>(this.base, toUppercaseDeep(request));
   }
 
   obtenerTodos(): Observable<Cliente[]> {
-    if (!environment.production) {
-      return of(MOCK_CLIENTES);
-    }
     return this.http.get<Cliente[]>(this.base);
   }
 
   obtenerPorId(id: number): Observable<Cliente> {
-    if (!environment.production) {
-      return of(MOCK_CLIENTES.find(c => c.id === id)!);
-    }
     return this.http.get<Cliente>(`${this.base}/${id}`);
+  }
+
+  actualizarCliente(id: number, request: ActualizarClienteRequest): Observable<Cliente> {
+    return this.http.put<Cliente>(`${this.base}/${id}`, toUppercaseDeep(request));
+  }
+
+  generarToken(): Observable<GenerarTokenResponse> {
+    return this.http.post<GenerarTokenResponse>(`${environment.apiUrl}/tokens`, {});
+  }
+
+  validarToken(token: string): Observable<ValidarTokenResponse> {
+    return this.http.get<ValidarTokenResponse>(`${environment.apiUrl}/tokens/${token}/validar`);
   }
 }

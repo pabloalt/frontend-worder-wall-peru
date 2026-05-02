@@ -9,7 +9,7 @@
       <button mat-stroked-button color="accent" (click)="toggleEnlace()" matTooltip="Compartir enlace de registro con un cliente">
         <mat-icon>person_add</mat-icon> Nuevo Cliente
       </button>
-      <button mat-raised-button color="primary" (click)="ngOnInit()">
+      <button mat-raised-button color="primary" (click)="cargarClientes()">
         <mat-icon>refresh</mat-icon> Actualizar
       </button>
     </div>
@@ -17,20 +17,26 @@
 
   <!-- Panel enlace externo -->
   <div class="enlace-panel" *ngIf="mostrarEnlace()">
-    <mat-icon class="enlace-icon">link</mat-icon>
-    <span class="enlace-label">Enlace de registro:</span>
-    <code class="enlace-url">{{ enlaceRegistro }}</code>
-    <div class="enlace-acciones">
-      <button mat-icon-button (click)="copiarEnlace()" matTooltip="Copiar enlace">
-        <mat-icon>content_copy</mat-icon>
-      </button>
-      <button mat-icon-button (click)="abrirEnlace()" matTooltip="Abrir en nueva pestaña">
-        <mat-icon>open_in_new</mat-icon>
-      </button>
-      <button mat-icon-button class="whatsapp-btn" (click)="compartirWhatsApp()" matTooltip="Enviar por WhatsApp">
-        <mat-icon>chat</mat-icon>
-      </button>
-    </div>
+    <ng-container *ngIf="generandoEnlace(); else enlaceListo">
+      <mat-spinner diameter="22"></mat-spinner>
+      <span class="enlace-label">Generando enlace...</span>
+    </ng-container>
+    <ng-template #enlaceListo>
+      <mat-icon class="enlace-icon">link</mat-icon>
+      <span class="enlace-label">Enlace de registro:</span>
+      <code class="enlace-url">{{ enlaceConToken() }}</code>
+      <div class="enlace-acciones">
+        <button mat-icon-button (click)="copiarEnlace()" matTooltip="Copiar enlace">
+          <mat-icon>content_copy</mat-icon>
+        </button>
+        <button mat-icon-button (click)="abrirEnlace()" matTooltip="Abrir en nueva pestaña">
+          <mat-icon>open_in_new</mat-icon>
+        </button>
+        <button mat-icon-button class="whatsapp-btn" (click)="compartirWhatsApp()" matTooltip="Enviar por WhatsApp">
+          <mat-icon>chat</mat-icon>
+        </button>
+      </div>
+    </ng-template>
   </div>
 
   <!-- Stats -->
@@ -38,14 +44,6 @@
     <div class="stat-chip">
       <mat-icon>group</mat-icon>
       <span><strong>{{ total() }}</strong> clientes</span>
-    </div>
-    <div class="stat-chip ok">
-      <mat-icon>picture_as_pdf</mat-icon>
-      <span><strong>{{ conContrato() }}</strong> con contrato</span>
-    </div>
-    <div class="stat-chip warn" *ngIf="sinContrato() > 0">
-      <mat-icon>warning</mat-icon>
-      <span><strong>{{ sinContrato() }}</strong> sin contrato</span>
     </div>
   </div>
 
@@ -56,7 +54,7 @@
     <input matInput
            [ngModel]="busqueda()"
            (ngModelChange)="busqueda.set($event)"
-           placeholder="Nombre, DNI, celular o email..." />
+           placeholder="Nombre, documento, celular o email..." />
     <button mat-icon-button matSuffix *ngIf="busqueda()" (click)="busqueda.set('')">
       <mat-icon>close</mat-icon>
     </button>
@@ -78,8 +76,8 @@
             <th mat-header-cell *matHeaderCellDef>Cliente</th>
             <td mat-cell *matCellDef="let row">
               <div class="cliente-cell">
-                <strong>{{ row.nombreCliente }}</strong>
-                <small class="dni">DNI: {{ row.dni }}</small>
+                <strong>{{ nombreCompleto(row) }}</strong>
+                <small class="dni">{{ row.tipoDocumento }}: {{ row.numeroDocumento }}</small>
                 <small class="fecha">Desde {{ row.creadoEn | date:'dd/MM/yyyy' }}</small>
               </div>
             </td>
@@ -113,51 +111,21 @@
             </td>
           </ng-container>
 
-          <!-- N.º Pedidos -->
-          <ng-container matColumnDef="pedidos">
-            <th mat-header-cell *matHeaderCellDef>Pedidos</th>
+          <!-- Fecha de boda -->
+          <ng-container matColumnDef="fechaBoda">
+            <th mat-header-cell *matHeaderCellDef>Fecha de boda</th>
             <td mat-cell *matCellDef="let row">
-              <span class="badge-pedidos">{{ row.pedidos.length }}</span>
+              {{ row.fechaBoda | date:'dd/MM/yyyy' }}
             </td>
           </ng-container>
 
-          <!-- Última boda -->
-          <ng-container matColumnDef="ultimaBoda">
-            <th mat-header-cell *matHeaderCellDef>Última boda</th>
+          <!-- Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef></th>
             <td mat-cell *matCellDef="let row">
-              {{ row.ultimoPedido.fechaBoda | date:'dd/MM/yyyy' }}
-            </td>
-          </ng-container>
-
-          <!-- Estado último pedido -->
-          <ng-container matColumnDef="estado">
-            <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let row">
-              <mat-chip [color]="getEstadoColor(row.ultimoPedido.estado)" selected>
-                {{ row.ultimoPedido.estado }}
-              </mat-chip>
-            </td>
-          </ng-container>
-
-          <!-- Contrato (acciones) -->
-          <ng-container matColumnDef="contrato">
-            <th mat-header-cell *matHeaderCellDef>Contrato</th>
-            <td mat-cell *matCellDef="let row">
-              <div class="contrato-acciones" *ngIf="row.ultimoPedido.contratoPdfUrl; else sinContratoTpl">
-                <button mat-icon-button color="primary"
-                        (click)="verContrato(row.ultimoPedido.contratoPdfUrl!)"
-                        matTooltip="Ver PDF">
-                  <mat-icon>picture_as_pdf</mat-icon>
-                </button>
-                <button mat-icon-button
-                        (click)="imprimirContrato(row.ultimoPedido.contratoPdfUrl!)"
-                        matTooltip="Imprimir contrato">
-                  <mat-icon>print</mat-icon>
-                </button>
-              </div>
-              <ng-template #sinContratoTpl>
-                <mat-icon color="warn" matTooltip="Sin contrato generado">cloud_off</mat-icon>
-              </ng-template>
+              <button mat-icon-button (click)="editarCliente(row)" matTooltip="Editar cliente">
+                <mat-icon>edit</mat-icon>
+              </button>
             </td>
           </ng-container>
 

@@ -165,27 +165,6 @@ th.mat-header-cell {
   mat-icon { font-size: 16px; height: 16px; width: 16px; }
 }
 
-/* Badge pedidos */
-.badge-pedidos {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #3E6F57;
-  color: white;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-/* Acciones contrato */
-.contrato-acciones {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
 /* Fila vacía */
 .empty-row {
   text-align: center;

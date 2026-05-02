@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 export interface UserInfo {
   name?: string;
@@ -44,7 +45,11 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    // Azure SWA handles auth via cookies, no local JWT needed
+    // En desarrollo, usar token hardcodeado para backend local
+    if (!environment.production && (environment as any).adminToken) {
+      return (environment as any).adminToken;
+    }
+    // En producción, Azure SWA maneja auth via cookies, no local JWT
     return null;
   }
 

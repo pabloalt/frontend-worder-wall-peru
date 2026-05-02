@@ -9,22 +9,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatBadgeModule } from '@angular/material/badge';
-import { PedidoService } from '../../core/services/pedido.service';
-import { EstadoPedido, Pedido } from '../../core/models';
-
-export interface FilaCliente {
-  nombreCliente: string;
-  dni: string;
-  celular?: string;
-  email?: string;
-  creadoEn: string;
-  pedidos: Pedido[];
-  ultimoPedido: Pedido;
-}
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ClienteService } from '../../core/services/cliente.service';
+import { Cliente } from '../../core/models';
+import { EditarClienteDialogComponent } from './editar-cliente-dialog.component';
 
 @Component({
   standalone: true,
@@ -41,74 +31,55 @@ export interface FilaCliente {
     MatInputModule,
     MatFormFieldModule,
     MatTooltipModule,
-    MatChipsModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
-    MatBadgeModule,
+    MatDialogModule,
   ]
 })
 export class ClientesComponent implements OnInit {
   loading = signal(true);
   busqueda = signal('');
 
-  private todosLosPedidos = signal<Pedido[]>([]);
+  private clientes = signal<Cliente[]>([]);
 
-  /** Agrupa pedidos por DNI y construye una fila por cliente */
-  private filas = computed<FilaCliente[]>(() => {
-    const mapa = new Map<string, Pedido[]>();
-    for (const p of this.todosLosPedidos()) {
-      const grupo = mapa.get(p.dni) ?? [];
-      grupo.push(p);
-      mapa.set(p.dni, grupo);
-    }
-
-    return Array.from(mapa.values()).map(pedidos => {
-      const ordenados = [...pedidos].sort(
-        (a, b) => new Date(b.creadoEn).getTime() - new Date(a.creadoEn).getTime()
-      );
-      const ultimo = ordenados[0];
-      return {
-        nombreCliente: ultimo.nombreCliente,
-        dni:           ultimo.dni,
-        celular:       ultimo.celular,
-        email:         ultimo.email,
-        creadoEn:      ordenados[ordenados.length - 1].creadoEn, // fecha del primer pedido
-        pedidos:       ordenados,
-        ultimoPedido:  ultimo,
-      };
-    }).sort((a, b) => a.nombreCliente.localeCompare(b.nombreCliente));
-  });
-
-  /** Filas filtradas por el buscador */
-  clientesFiltrados = computed<FilaCliente[]>(() => {
+  clientesFiltrados = computed<Cliente[]>(() => {
     const q = this.busqueda().toLowerCase().trim();
-    if (!q) return this.filas();
-    return this.filas().filter(c =>
-      c.nombreCliente.toLowerCase().includes(q) ||
-      c.dni.includes(q) ||
+    if (!q) return this.clientes();
+    return this.clientes().filter(c =>
+      c.nombres.toLowerCase().includes(q) ||
+      c.apellidoPaterno.toLowerCase().includes(q) ||
+      (c.apellidoMaterno?.toLowerCase().includes(q) ?? false) ||
+      c.numeroDocumento.includes(q) ||
       (c.email?.toLowerCase().includes(q) ?? false) ||
       (c.celular?.includes(q) ?? false)
     );
   });
 
-  total         = computed(() => this.filas().length);
-  conContrato   = computed(() => this.filas().filter(c => c.ultimoPedido.contratoPdfUrl).length);
-  sinContrato   = computed(() => this.total() - this.conContrato());
+  total = computed(() => this.clientes().length);
 
-  mostrarEnlace = signal(false);
-  readonly enlaceRegistro = inject(DOCUMENT).location.origin + '/registro-cliente';
+  mostrarEnlace   = signal(false);
+  generandoEnlace = signal(false);
+  enlaceConToken  = signal<string | null>(null);
 
-  displayedColumns = ['cliente', 'contacto', 'pedidos', 'ultimaBoda', 'estado', 'contrato'];
+  private readonly baseRegistro = inject(DOCUMENT).location.origin + '/registro-cliente';
+
+  displayedColumns = ['cliente', 'contacto', 'fechaBoda', 'acciones'];
 
   constructor(
-    private pedidoService: PedidoService,
-    private snackBar: MatSnackBar
+    private clienteService: ClienteService,
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
-    this.pedidoService.obtenerTodos().subscribe({
+    this.cargarClientes();
+  }
+
+  cargarClientes(): void {
+    this.loading.set(true);
+    this.clienteService.obtenerTodos().subscribe({
       next: (data) => {
-        this.todosLosPedidos.set(data);
+        this.clientes.set(data);
         this.loading.set(false);
       },
       error: () => {
@@ -118,34 +89,61 @@ export class ClientesComponent implements OnInit {
     });
   }
 
-  toggleEnlace(): void {
-    this.mostrarEnlace.update(v => !v);
-  }
+  editarCliente(cliente: Cliente): void {
+    const ref = this.dialog.open(EditarClienteDialogComponent, {
+      width: '720px',
+      maxWidth: '95vw',
+      data: cliente,
+    });
 
-  copiarEnlace(): void {
-    navigator.clipboard.writeText(this.enlaceRegistro).then(() => {
-      this.snackBar.open('¡Enlace copiado al portapapeles!', '✓', { duration: 3000 });
+    ref.afterClosed().subscribe((actualizado: Cliente | undefined) => {
+      if (!actualizado) return;
+      this.clientes.update(lista =>
+        lista.map(c => c.id === actualizado.id ? actualizado : c)
+      );
+      this.snackBar.open('Cliente actualizado correctamente', '✓', { duration: 3000 });
     });
   }
 
+  toggleEnlace(): void {
+    if (this.mostrarEnlace()) {
+      this.mostrarEnlace.set(false);
+      this.enlaceConToken.set(null);
+      return;
+    }
+    this.mostrarEnlace.set(true);
+    this.generandoEnlace.set(true);
+    this.clienteService.generarToken().subscribe({
+      next: ({ token }) => {
+        this.enlaceConToken.set(`${this.baseRegistro}?token=${token}`);
+        this.generandoEnlace.set(false);
+      },
+      error: () => {
+        this.generandoEnlace.set(false);
+        this.mostrarEnlace.set(false);
+        this.snackBar.open('No se pudo generar el enlace', '✗', { duration: 3000 });
+      }
+    });
+  }
+
+  copiarEnlace(): void {
+    const url = this.enlaceConToken();
+    if (!url) return;
+    navigator.clipboard.writeText(url)
+      .then(() => this.snackBar.open('¡Enlace copiado al portapapeles!', '✓', { duration: 3000 }))
+      .catch(() => this.snackBar.open('No se pudo copiar el enlace', '✗', { duration: 3000 }));
+  }
+
   abrirEnlace(): void {
-    window.open(this.enlaceRegistro, '_blank');
+    const url = this.enlaceConToken();
+    if (url) window.open(url, '_blank');
   }
 
   compartirWhatsApp(): void {
-    const mensaje = encodeURIComponent(`Registrá tu pedido aquí: ${this.enlaceRegistro}`);
+    const url = this.enlaceConToken();
+    if (!url) return;
+    const mensaje = encodeURIComponent(`Registrá tus datos aquí: ${url}`);
     window.open(`https://wa.me/?text=${mensaje}`, '_blank');
-  }
-
-  verContrato(url: string): void {
-    window.open(url, '_blank');
-  }
-
-  imprimirContrato(url: string): void {
-    const ventana = window.open(url, '_blank');
-    if (ventana) {
-      ventana.addEventListener('load', () => ventana.print());
-    }
   }
 
   contactarEmail(email: string): void {
@@ -157,12 +155,7 @@ export class ClientesComponent implements OnInit {
     window.open(`https://wa.me/51${numero}`, '_blank');
   }
 
-  getEstadoColor(estado: EstadoPedido): string {
-    const map: Record<EstadoPedido, string> = {
-      [EstadoPedido.Cotizado]:  'accent',
-      [EstadoPedido.Pagado]:    'primary',
-      [EstadoPedido.Entregado]: '',
-    };
-    return map[estado] ?? '';
+  nombreCompleto(c: Cliente): string {
+    return [c.nombres, c.apellidoPaterno, c.apellidoMaterno].filter(Boolean).join(' ');
   }
 }

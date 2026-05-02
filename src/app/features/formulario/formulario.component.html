@@ -26,45 +26,72 @@
     <mat-card>
       <mat-card-header>
         <mat-card-title>
-          <mat-icon>person</mat-icon> Datos del Cliente
+          <mat-icon>person</mat-icon> Seleccionar Cliente
         </mat-card-title>
       </mat-card-header>
       <mat-card-content>
+        <!-- Autocomplete de búsqueda de cliente -->
         <div class="form-row">
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Nombre completo *</mat-label>
-            <input matInput formControlName="nombre" placeholder="Ej: María García López">
-            <mat-error *ngIf="form.get('nombre')?.hasError('required')">El nombre es requerido</mat-error>
+            <mat-label>Buscar cliente *</mat-label>
+            <input type="text"
+                   matInput
+                   formControlName="clienteBusqueda"
+                   [matAutocomplete]="auto"
+                   placeholder="Buscar por nombre, documento o email...">
+            <mat-icon matPrefix>search</mat-icon>
+            <mat-spinner *ngIf="cargandoClientes()" matSuffix diameter="20"></mat-spinner>
+            <mat-autocomplete #auto="matAutocomplete"
+                             [displayWith]="mostrarCliente.bind(this)"
+                             (optionSelected)="seleccionarCliente($event.option.value)">
+              <mat-option *ngFor="let cliente of clientesFiltrados()" [value]="cliente">
+                <div class="cliente-option">
+                  <strong>{{ cliente.nombres }} {{ cliente.apellidoPaterno }} {{ cliente.apellidoMaterno }}</strong>
+                  <small>{{ cliente.tipoDocumento }}: {{ cliente.numeroDocumento }}</small>
+                </div>
+              </mat-option>
+              <mat-option *ngIf="clientesFiltrados().length === 0" disabled>
+                No se encontraron clientes
+              </mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="form.get('clienteId')?.hasError('required')">Debe seleccionar un cliente</mat-error>
           </mat-form-field>
         </div>
 
-        <div class="form-row cols-3">
-          <mat-form-field appearance="outline">
-            <mat-label>DNI *</mat-label>
-            <input matInput formControlName="dni" placeholder="12345678" maxlength="8">
-            <mat-error *ngIf="form.get('dni')?.hasError('pattern')">DNI debe tener 8 dígitos</mat-error>
-          </mat-form-field>
+        <!-- Datos del cliente seleccionado (readonly) -->
+        <div *ngIf="clienteSeleccionado()" class="cliente-seleccionado">
+          <div class="form-row cols-3">
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre completo</mat-label>
+              <input matInput formControlName="nombre" readonly>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Celular</mat-label>
-            <input matInput formControlName="celular" placeholder="987654321">
-          </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Documento</mat-label>
+              <input matInput formControlName="dni" readonly>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Email</mat-label>
-            <input matInput formControlName="email" type="email" placeholder="correo@ejemplo.com">
-            <mat-error *ngIf="form.get('email')?.hasError('email')">Email inválido</mat-error>
-          </mat-form-field>
-        </div>
+            <mat-form-field appearance="outline">
+              <mat-label>Celular</mat-label>
+              <input matInput formControlName="celular" readonly>
+            </mat-form-field>
+          </div>
 
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Fecha de Boda *</mat-label>
-            <input matInput [matDatepicker]="picker" formControlName="fechaBoda" [min]="minDate">
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-            <mat-error *ngIf="form.get('fechaBoda')?.hasError('required')">La fecha es requerida</mat-error>
-          </mat-form-field>
+          <div class="form-row cols-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" readonly>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de Boda *</mat-label>
+              <input matInput [matDatepicker]="picker" formControlName="fechaBoda" [min]="minDate">
+              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+              <mat-error *ngIf="form.get('fechaBoda')?.hasError('required')">La fecha es requerida</mat-error>
+              <mat-hint>Puede modificar la fecha si es necesario</mat-hint>
+            </mat-form-field>
+          </div>
         </div>
       </mat-card-content>
     </mat-card>

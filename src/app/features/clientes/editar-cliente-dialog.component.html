@@ -1,0 +1,87 @@
+<h2 mat-dialog-title>Editar cliente</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="dialog-form">
+
+    <!-- Documento -->
+    <div class="form-row cols-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Tipo de documento</mat-label>
+        <mat-select formControlName="tipoDocumento">
+          <mat-option value="DNI">DNI</mat-option>
+          <mat-option value="CE">Carné de Extranjería</mat-option>
+          <mat-option value="PASAPORTE">Pasaporte</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('tipoDocumento')?.hasError('required')">Requerido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Número de documento</mat-label>
+        <input matInput formControlName="numeroDocumento">
+        <mat-error *ngIf="form.get('numeroDocumento')?.hasError('required')">Requerido</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Nombres -->
+    <div class="form-row cols-3">
+      <mat-form-field appearance="outline">
+        <mat-label>Nombres</mat-label>
+        <input matInput formControlName="nombres">
+        <mat-error *ngIf="form.get('nombres')?.hasError('required')">Requerido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Apellido Paterno</mat-label>
+        <input matInput formControlName="apellidoPaterno">
+        <mat-error *ngIf="form.get('apellidoPaterno')?.hasError('required')">Requerido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Apellido Materno</mat-label>
+        <input matInput formControlName="apellidoMaterno">
+      </mat-form-field>
+    </div>
+
+    <!-- Fechas -->
+    <div class="form-row cols-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha de cumpleaños</mat-label>
+        <input matInput [matDatepicker]="pickerCumple" formControlName="fechaCumpleanios">
+        <mat-datepicker-toggle matIconSuffix [for]="pickerCumple"></mat-datepicker-toggle>
+        <mat-datepicker #pickerCumple></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha de boda</mat-label>
+        <input matInput [matDatepicker]="pickerBoda" formControlName="fechaBoda">
+        <mat-datepicker-toggle matIconSuffix [for]="pickerBoda"></mat-datepicker-toggle>
+        <mat-datepicker #pickerBoda></mat-datepicker>
+        <mat-error *ngIf="form.get('fechaBoda')?.hasError('required')">Requerido</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Contacto -->
+    <div class="form-row cols-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Celular</mat-label>
+        <input matInput formControlName="celular">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email">
+        <mat-error *ngIf="form.get('email')?.hasError('email')">Email inválido</mat-error>
+      </mat-form-field>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancelar()" [disabled]="guardando">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="guardar()" [disabled]="guardando">
+    <mat-spinner *ngIf="guardando" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+    <mat-icon *ngIf="!guardando">save</mat-icon>
+    {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+  </button>
+</mat-dialog-actions>

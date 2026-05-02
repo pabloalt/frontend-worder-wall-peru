@@ -287,3 +287,37 @@ mat-card {
     grid-template-columns: 1fr;
   }
 }
+
+/* Autocomplete de cliente */
+.cliente-option {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+
+  strong {
+    font-size: 0.95rem;
+    color: #333;
+  }
+
+  small {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 2px;
+  }
+}
+
+.cliente-seleccionado {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f0f7f4;
+  border-radius: 8px;
+  border-left: 4px solid #3E6F57;
+
+  mat-form-field {
+    opacity: 0.9;
+
+    ::ng-deep .mat-mdc-text-field-wrapper {
+      background-color: white;
+    }
+  }
+}

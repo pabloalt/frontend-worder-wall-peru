@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CrearPedidoRequest, EstadoPedido, Pedido } from '../models';
+import { toUppercaseDeep } from '../utils/uppercase.util';
 
 const MOCK_PEDIDOS: Pedido[] = [
   // ── Marzo 2026 ─────────────────────────────────────────────
@@ -194,22 +195,9 @@ export class PedidoService {
   constructor(private http: HttpClient) {}
 
   crearPedido(request: CrearPedidoRequest): Observable<Pedido> {
-    if (!environment.production) {
-      const nuevo: Pedido = {
-        id: Date.now(),
-        nombreCliente: request.nombre,
-        dni: request.dni,
-        email: request.email,
-        celular: request.celular,
-        fechaBoda: request.fechaBoda,
-        estado: EstadoPedido.Cotizado,
-        creadoEn: new Date().toISOString(),
-        detalles: request.detalles,
-        logistica: request.logistica,
-      };
-      return of(nuevo);
-    }
-    return this.http.post<Pedido>(this.base, request);
+    const normalizedRequest = toUppercaseDeep(request);
+    console.log('📤 Enviando pedido al backend:', normalizedRequest);
+    return this.http.post<Pedido>(this.base, normalizedRequest);
   }
 
   obtenerTodos(): Observable<Pedido[]> {

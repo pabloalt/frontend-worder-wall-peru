@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -13,8 +13,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { PedidoService } from '../../core/services/pedido.service';
-import { CrearPedidoRequest } from '../../core/models';
+import { ClienteService } from '../../core/services/cliente.service';
+import { CrearPedidoRequest, Cliente } from '../../core/models';
 
 @Component({
   standalone: true,
@@ -36,25 +38,49 @@ import { CrearPedidoRequest } from '../../core/models';
     MatSnackBarModule,
     MatDividerModule,
     MatSelectModule,
+    MatAutocompleteModule,
   ]
 })
-export class FormularioComponent {
+export class FormularioComponent implements OnInit {
   form: FormGroup;
   loading = signal(false);
   success = signal(false);
   contratoUrl = signal<string | null>(null);
-  minDate = new Date();
+  get minDate(): Date { return new Date(); }
 
   /** Base64 comprimida por índice de detalle */
   imagenesDetalle = signal<(string | null)[]>([null]);
 
+  // Clientes para autocomplete
+  clientes = signal<Cliente[]>([]);
+  cargandoClientes = signal(false);
+  clienteSeleccionado = signal<Cliente | null>(null);
+  busquedaCliente = signal('');
+
+  clientesFiltrados = computed<Cliente[]>(() => {
+    const busqueda = this.busquedaCliente();
+    const q = (typeof busqueda === 'string' ? busqueda : '').toLowerCase().trim();
+    if (!q) return this.clientes().slice(0, 10); // Mostrar primeros 10
+    return this.clientes().filter(c =>
+      c.nombres.toLowerCase().includes(q) ||
+      c.apellidoPaterno.toLowerCase().includes(q) ||
+      (c.apellidoMaterno?.toLowerCase().includes(q) ?? false) ||
+      c.numeroDocumento.includes(q) ||
+      (c.email?.toLowerCase().includes(q) ?? false)
+    ).slice(0, 10);
+  });
+
   constructor(
     private fb: FormBuilder,
     private pedidoService: PedidoService,
+    private clienteService: ClienteService,
     private snackBar: MatSnackBar
   ) {
     this.form = this.fb.group({
-      // Cliente
+      // Autocomplete de cliente
+      clienteBusqueda: [''],
+      clienteId:       [null],
+      // Cliente (auto-populated desde autocomplete)
       nombre:     ['', [Validators.required, Validators.minLength(3)]],
       dni:        ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
       celular:    [''],
@@ -75,6 +101,70 @@ export class FormularioComponent {
     });
 
     this.form.get('numeroCuotas')!.valueChanges.subscribe((n: number) => this.actualizarCuotas(n));
+    this.form.get('clienteBusqueda')!.valueChanges.subscribe((val: any) => {
+      // Actualizar búsqueda solo si es string, sino vacío
+      this.busquedaCliente.set(typeof val === 'string' ? val : '');
+      // Si cambia a string (usuario está escribiendo), limpiar selección
+      if (typeof val === 'string') {
+        this.clienteSeleccionado.set(null);
+        this.form.patchValue({
+          clienteId: null,
+          nombre: '',
+          dni: '',
+          celular: '',
+          email: '',
+          fechaBoda: null
+        });
+      }
+    });
+  }
+
+  ngOnInit(): void {
+    this.cargarClientes();
+  }
+
+  cargarClientes(): void {
+    this.cargandoClientes.set(true);
+    this.clienteService.obtenerTodos().subscribe({
+      next: (data) => {
+        // Ordenar por fecha de creación descendente (más recientes primero)
+        this.clientes.set(data.sort((a, b) =>
+          new Date(b.creadoEn).getTime() - new Date(a.creadoEn).getTime()
+        ));
+        this.cargandoClientes.set(false);
+      },
+      error: () => {
+        this.cargandoClientes.set(false);
+        this.snackBar.open('Error al cargar clientes', '✗', { duration: 3000 });
+      }
+    });
+  }
+
+  mostrarCliente(cliente: Cliente | null): string {
+    if (!cliente) return '';
+    return `${cliente.nombres} ${cliente.apellidoPaterno} ${cliente.apellidoMaterno || ''} - ${cliente.numeroDocumento}`.trim();
+  }
+
+  seleccionarCliente(cliente: Cliente): void {
+    this.clienteSeleccionado.set(cliente);
+    this.form.patchValue({
+      clienteId: cliente.id,
+      nombre: `${cliente.nombres} ${cliente.apellidoPaterno} ${cliente.apellidoMaterno || ''}`.trim(),
+      dni: cliente.numeroDocumento,
+      celular: cliente.celular || '',
+      email: cliente.email || '',
+      fechaBoda: new Date(cliente.fechaBoda)
+    });
+    // Cargar logística si existe
+    if (cliente.logistica) {
+      this.form.patchValue({
+        nombreLocal: cliente.logistica.nombreLocal || '',
+        direccion: cliente.logistica.direccion || '',
+        ubicacionMaps: cliente.logistica.ubicacionMaps || '',
+        horaLlegada: cliente.logistica.horaLlegada || '',
+        horaLlegadaPorConfirmar: !cliente.logistica.horaLlegada
+      });
+    }
   }
 
   get detalles(): FormArray {
@@ -187,27 +277,53 @@ export class FormularioComponent {
   }
 
   onSubmit(): void {
+    console.log('🚀 Iniciando onSubmit()');
+    console.log('📋 Estado del formulario:', {
+      valid: this.form.valid,
+      invalid: this.form.invalid,
+      value: this.form.value,
+      clienteSeleccionado: this.clienteSeleccionado()
+    });
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      if (!this.clienteSeleccionado()) {
+        this.snackBar.open('Debe seleccionar un cliente', '✗', { duration: 3000 });
+      }
+      console.warn('⚠️ Formulario inválido, abortando');
       return;
     }
 
     const val = this.form.value;
+    const cliente = this.clienteSeleccionado();
+    if (!cliente) {
+      this.snackBar.open('Debe seleccionar un cliente válido', '✗', { duration: 3000 });
+      console.warn('⚠️ Cliente no seleccionado, abortando');
+      return;
+    }
+
+    console.log('✅ Validaciones pasadas, construyendo request...');
+
+    // Construir request según especificación del backend
     const request: CrearPedidoRequest = {
-      nombre:    val.nombre,
-      dni:       val.dni,
-      celular:   val.celular || undefined,
-      email:     val.email || undefined,
+      nombre:    `${cliente.nombres} ${cliente.apellidoPaterno}${cliente.apellidoMaterno ? ' ' + cliente.apellidoMaterno : ''}`.trim(),
+      dni:       cliente.numeroDocumento,
+      celular:   cliente.celular || undefined,
+      email:     cliente.email || undefined,
       fechaBoda: (val.fechaBoda as Date).toISOString(),
       detalles:  val.detalles.map((d: any, i: number) => ({
-        ...d,
-        imagenReferencial: this.imagenesDetalle()[i] ?? undefined,
+        tipoKeke:          d.tipoKeke,
+        relleno:           d.relleno || undefined,
+        porciones:         +d.porciones,
+        esMaqueta:         d.esMaqueta,
+        observaciones:     d.observaciones || undefined,
+        imagenReferencial: this.imagenesDetalle()[i] || undefined,
       })),
       pago: (+(val.importeTotal ?? 0)) > 0 ? {
         importeTotal: +(val.importeTotal),
         subtotal:     +(val.importeTotal) / 1.18,
-        igv:          +(val.importeTotal) - +(val.importeTotal) / 1.18,
-        numeroCuotas: val.numeroCuotas,
+        igv:          +(val.importeTotal) - (+(val.importeTotal) / 1.18),
+        numeroCuotas: +val.numeroCuotas,
         cuotas: (val.cuotas as any[]).map((c, i) => ({
           numero:  i + 1,
           importe: +(c.importe ?? 0),
@@ -222,25 +338,42 @@ export class FormularioComponent {
       } : undefined
     };
 
+    console.log('📦 Request construido:', request);
+    console.log('⏳ Llamando a pedidoService.crearPedido()...');
+
     this.loading.set(true);
     this.pedidoService.crearPedido(request).subscribe({
       next: (pedido) => {
+        console.log('✅ Pedido creado exitosamente:', pedido);
         this.loading.set(false);
         this.success.set(true);
         this.contratoUrl.set(pedido.contratoPdfUrl ?? null);
-        this.snackBar.open('¡Pedido registrado! Te enviaremos el contrato por correo.', '✓', { duration: 6000 });
+        this.snackBar.open('¡Pedido registrado! Contrato enviado por correo.', '✓', { duration: 6000 });
+
+        // Resetear formulario
         this.form.reset();
+        this.clienteSeleccionado.set(null);
+        this.busquedaCliente.set('');
+
+        // Resetear detalles
         while (this.detalles.length > 1) this.detalles.removeAt(1);
         this.detalles.at(0).reset({ esMaqueta: false, porciones: 1 });
         this.imagenesDetalle.set([null]);
-        this.form.get('importeTotal')?.reset(null);
-        this.form.get('numeroCuotas')?.setValue(1, { emitEvent: false });
+
+        // Resetear pago
+        this.form.patchValue({
+          importeTotal: null,
+          numeroCuotas: 1,
+          horaLlegadaPorConfirmar: true
+        });
         this.actualizarCuotas(1);
         this.cuotas.at(0).reset();
       },
-      error: () => {
+      error: (err) => {
         this.loading.set(false);
-        this.snackBar.open('Error al registrar el pedido. Intente nuevamente.', '✗', { duration: 4000 });
+        console.error('Error al crear pedido:', err);
+        const mensaje = err?.error?.mensaje || err?.message || 'Error al registrar el pedido. Intente nuevamente.';
+        this.snackBar.open(mensaje, '✗', { duration: 5000 });
       }
     });
   }

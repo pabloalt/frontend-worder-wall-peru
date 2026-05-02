@@ -16,6 +16,49 @@ export interface Cliente {
   celular?: string;
   email?: string;
   creadoEn: string;
+  modificadoEn?: string;
+  logistica?: LogisticaCliente;
+}
+
+export interface LogisticaCliente {
+  id: number;
+  clienteId: number;
+  nombreLocal?: string;
+  direccion?: string;
+  ubicacionMaps?: string;
+  horaLlegada?: string;
+  creadoEn: string;
+  modificadoEn?: string;
+}
+
+export interface GenerarTokenResponse {
+  token: string;
+  expiraEn: string;
+}
+
+export interface ValidarTokenResponse {
+  valido: boolean;
+  motivo?: string;
+}
+
+export interface ActualizarClienteRequest {
+  tipoDocumento: string;
+  numeroDocumento: string;
+  nombres: string;
+  apellidoPaterno: string;
+  apellidoMaterno?: string;
+  fechaCumpleanios?: string;
+  fechaBoda: string;
+  celular?: string;
+  email?: string;
+  logistica?: LogisticaClienteRequest;
+}
+
+export interface LogisticaClienteRequest {
+  nombreLocal?: string;
+  direccion?: string;
+  ubicacionMaps?: string;
+  horaLlegada?: string;
 }
 
 export interface CrearClienteRequest {
@@ -28,7 +71,8 @@ export interface CrearClienteRequest {
   fechaBoda: string;
   celular?: string;
   email?: string;
-  logistica?: LogisticaPedido;
+  logistica?: LogisticaClienteRequest;
+  token?: string;
 }
 
 export interface DetallePedido {
@@ -80,14 +124,10 @@ export interface Pedido {
 export interface CrearPedidoRequest {
   nombre: string;
   dni: string;
-  tipoDocumento?: string;
-  apellidoPaterno?: string;
-  apellidoMaterno?: string;
-  fechaCumpleanios?: string;
   celular?: string;
   email?: string;
   fechaBoda: string;
   detalles: DetallePedido[];
-  logistica?: LogisticaPedido;
   pago?: PagoPedido;
+  logistica?: LogisticaPedido;
 }
