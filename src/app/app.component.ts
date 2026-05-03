@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -31,15 +31,11 @@ import { ToastContainerComponent } from './shared/toast-container/toast-containe
     ToastContainerComponent,
   ]
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   title = 'Wonderwall Catering';
   menuAbierto = signal(false);
 
   constructor(public auth: AuthService) {}
-
-  ngOnInit(): void {
-    this.auth.loadUser();
-  }
 
   toggleMenu(): void {
     this.menuAbierto.update(v => !v);

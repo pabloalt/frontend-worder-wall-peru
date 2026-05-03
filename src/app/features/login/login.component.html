@@ -1,0 +1,51 @@
+<div class="login-page">
+  <mat-card class="login-card">
+    <div class="login-logo">🎂</div>
+    <h1 class="login-title">Wonderwall Catering</h1>
+    <p class="login-subtitle">Área de administración</p>
+
+    <div class="login-divider"></div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Correo electrónico</mat-label>
+        <mat-icon matPrefix>email</mat-icon>
+        <input matInput formControlName="email" type="email"
+               autocomplete="email" placeholder="correo@ejemplo.com">
+        @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
+          <mat-error>El correo es requerido</mat-error>
+        } @else if (form.get('email')?.hasError('email')) {
+          <mat-error>Ingresa un correo válido</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Contraseña</mat-label>
+        <mat-icon matPrefix>lock</mat-icon>
+        <input matInput formControlName="password"
+               [type]="mostrarPassword() ? 'text' : 'password'"
+               autocomplete="current-password">
+        <button mat-icon-button matSuffix type="button"
+                (click)="mostrarPassword.set(!mostrarPassword())">
+          <mat-icon>{{ mostrarPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (form.get('password')?.hasError('required') && form.get('password')?.touched) {
+          <mat-error>La contraseña es requerida</mat-error>
+        }
+      </mat-form-field>
+
+      @if (error()) {
+        <p class="login-error">
+          <mat-icon>error_outline</mat-icon>
+          {{ error() }}
+        </p>
+      }
+
+      <button mat-flat-button color="primary" type="submit" class="full-width login-btn">
+        Iniciar sesión
+      </button>
+
+    </form>
+  </mat-card>
+</div>

@@ -4,9 +4,16 @@ import { authGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
   {
     path: '',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/formulario/formulario.component').then(m => m.FormularioComponent),
     title: 'Registrar Pedido'
+  },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/login/login.component').then(m => m.LoginComponent),
+    title: 'Iniciar sesión'
   },
   {
     path: 'registro-cliente',

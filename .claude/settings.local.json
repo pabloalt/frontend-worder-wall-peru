@@ -19,13 +19,16 @@
       "Bash(git -C \"C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\frontend\" push origin develop)",
       "Bash(git -C \"C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\backend\" push origin develop)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Pablo\\\\Documents\\\\Personal\\\\wonderwall\\\\Proyecto\\\\frontend\" -Recurse -Filter \"*pedido*\" -ErrorAction SilentlyContinue)",
-      "Read(//c/Users/Pablo/Documents/Personal/wonderwall/Proyecto/**)"
+      "Read(//c/Users/Pablo/Documents/Personal/wonderwall/Proyecto/**)",
+      "Bash(npx ng *)",
+      "Bash(dotnet build *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\Pablo\\Documents\\Personal\\wonderwall\\Proyecto\\backend\\Functions",
       "C:\\Users\\Pablo\\Documents\\Personal\\wonderwall\\Proyecto\\backend\\Models",
       "C:\\Users\\Pablo\\Documents\\Personal\\wonderwall\\Proyecto\\backend\\Services",
-      "C:\\Users\\Pablo\\Documents\\Personal\\wonderwall\\Proyecto\\backend\\Data"
+      "C:\\Users\\Pablo\\Documents\\Personal\\wonderwall\\Proyecto\\backend\\Data",
+      "C:\\Users\\Pablo\\Documents\\Personal\\wonderwall\\Proyecto\\backend"
     ]
   }
 }

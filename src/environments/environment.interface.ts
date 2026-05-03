@@ -1,6 +1,12 @@
+export interface AdminUser {
+  name: string;
+  email: string;
+  password: string;
+}
+
 export interface Environment {
   production: boolean;
   apiUrl: string;
-  bypassAuth: boolean;
   adminToken: string;
+  users: AdminUser[];
 }

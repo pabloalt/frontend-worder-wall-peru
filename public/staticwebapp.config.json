@@ -1,4 +1,7 @@
 {
+  "auth": {
+    "rolesSource": "/api/GetUserRoles"
+  },
   "routes": [
     {
       "route": "/api/*",
@@ -6,10 +9,6 @@
     },
     {
       "route": "/admin/*",
-      "allowedRoles": ["admin"]
-    },
-    {
-      "route": "/.auth/login/aad",
       "allowedRoles": ["anonymous"]
     }
   ],
@@ -19,7 +18,7 @@
   },
   "responseOverrides": {
     "401": {
-      "redirect": "/.auth/login/aad",
+      "redirect": "/login",
       "statusCode": 302
     }
   },

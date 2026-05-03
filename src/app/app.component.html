@@ -65,7 +65,7 @@
         </a>
       </ng-container>
       <ng-template #sinSesionTpl>
-        <a mat-list-item (click)="auth.login(); cerrarMenu()">
+        <a mat-list-item (click)="auth.goToLogin(); cerrarMenu()">
           <mat-icon matListItemIcon>login</mat-icon>
           <span matListItemTitle>Iniciar sesión (Admin)</span>
         </a>
@@ -76,28 +76,20 @@
   <!-- Contenido principal -->
   <mat-sidenav-content>
 
-    <!-- Toolbar -->
-    <mat-toolbar color="primary" class="app-toolbar">
-      <button mat-icon-button (click)="toggleMenu()" aria-label="Menú">
-        <mat-icon>menu</mat-icon>
-      </button>
-      <span class="toolbar-title">🎂 {{ title }}</span>
-      <span class="spacer"></span>
-
-      <!-- Acceso rápido sesión en toolbar -->
-      <ng-container *ngIf="!auth.isAuthenticated()">
-        <button mat-button (click)="auth.login()">
-          <mat-icon>login</mat-icon> Admin
+    <!-- Toolbar (solo cuando hay sesión) -->
+    @if (auth.isAuthenticated()) {
+      <mat-toolbar color="primary" class="app-toolbar">
+        <button mat-icon-button (click)="toggleMenu()" aria-label="Menú">
+          <mat-icon>menu</mat-icon>
         </button>
-      </ng-container>
-
-      <ng-container *ngIf="auth.isAuthenticated()">
+        <span class="toolbar-title">🎂 {{ title }}</span>
+        <span class="spacer"></span>
         <span class="user-name">{{ auth.currentUser()?.name }}</span>
         <button mat-icon-button (click)="auth.logout()" matTooltip="Cerrar sesión">
           <mat-icon>logout</mat-icon>
         </button>
-      </ng-container>
-    </mat-toolbar>
+      </mat-toolbar>
+    }
 
     <!-- Vista del router -->
     <main class="main-content">
