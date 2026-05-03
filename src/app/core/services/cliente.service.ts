@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ActualizarClienteRequest, Cliente, CrearClienteRequest, GenerarTokenResponse, ValidarTokenResponse } from '../models';
 import { toUppercaseDeep } from '../utils/uppercase.util';
+import { SKIP_AUTH } from '../interceptors/auth.interceptor';
 
 @Injectable({ providedIn: 'root' })
 export class ClienteService {
@@ -11,8 +12,9 @@ export class ClienteService {
 
   constructor(private http: HttpClient) {}
 
-  crearCliente(request: CrearClienteRequest): Observable<Cliente> {
-    return this.http.post<Cliente>(this.base, toUppercaseDeep(request));
+  crearCliente(request: CrearClienteRequest, skipAuth = false): Observable<Cliente> {
+    const context = skipAuth ? new HttpContext().set(SKIP_AUTH, true) : undefined;
+    return this.http.post<Cliente>(this.base, toUppercaseDeep(request), { context });
   }
 
   obtenerTodos(): Observable<Cliente[]> {

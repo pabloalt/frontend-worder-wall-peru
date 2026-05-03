@@ -134,7 +134,7 @@ export class RegistroClienteComponent implements OnInit {
     };
 
     this.loading.set(true);
-    this.clienteService.crearCliente(request).subscribe({
+    this.clienteService.crearCliente(request, true).subscribe({
       next: () => {
         this.loading.set(false);
         this.success.set(true);
